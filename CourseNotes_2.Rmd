@@ -649,26 +649,11 @@ You can also use the "convenience" functions for limits for x- and y-axes:
 
 ## Excellent references
 
-- R Graphics Cookbook
+- [R Graphics Cookbook](www.cookbook-r.com)
 - Google images
-
-# Odds and ends
-
-## R cheat sheets
-
-- [General (CRAN)](https://cran.r-project.org/doc/contrib/Baggott-refcard-v2.pdf)
 - [ggplot](https://www.rstudio.com/wp-content/uploads/2015/08/ggplot2-cheatsheet.pdf)
-- [R Markdown (next week)](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
-- [Data wrangling (two weeks from now)](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
-- [Data management](http://www.ualberta.ca/~ahamann/teaching/renr690/R_Cheat_Data.pdf)
-- [quandl](https://s3.amazonaws.com/quandl-static-content/Documents/Quandl+-+R+Cheat+Sheet.pdf)
 
-## Picking packages
+Other "cheatsheets":
 
-How can I find a reliable package?
-
-- Google "r [what I'm trying to do] tutorial pdf". Look for tutorials / lecture notes from courses at reputable universities
-- Find packages with an accompanying article in the *Journal of Statistical Software* or *R Journal* (or another peer-reviewed publication)
-- Use packages recommended by statistics textbooks from our library
-- Look for packages referenced in peer-reviewed research in my field
-- For a package for graphics, if it works, it works. For methods, be a bit more cautious.
+- [R Markdown](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+- [Data wrangling](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
