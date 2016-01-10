@@ -1,7 +1,7 @@
 ---
-title: "Week 1— In Course Exercises"
+title: "In Course Exercise 1"
 author: "Brooke Anderson"
-date: "August 23, 2015"
+date: "January 12, 2015"
 output: html_document
 ---
 
@@ -11,7 +11,9 @@ For today's class, you'll be using a dataset of all the guests on Jon Stewart's 
 
 # Getting the data onto your computer
 
-First, download the data from GitHub onto your computer. Put it in your directory (folder) for this course. 
+First, create a new R script file to put all the code you use for this exercise.
+
+Next, download the data from GitHub onto your computer. Put it in your directory (folder) for this course. 
 
 **Take the following steps to get the data onto your computer**
 
@@ -30,6 +32,7 @@ getwd()
 setwd("Desktop/ChinaCDCRWorkshop/ChinaCourseMaterials")
 getwd()
 
+list.files()
 list.files("data")
 
 "daily_show_guests.csv" %in% list.files("data")
