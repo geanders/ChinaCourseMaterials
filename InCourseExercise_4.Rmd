@@ -1,0 +1,203 @@
+---
+title: "In Course Exercise 4"
+author: "Brooke Anderson"
+date: "January 12, 2016"
+output: html_document
+---
+
+```{r echo = FALSE}
+knitr::opts_chunk$set(fig.path='figures/exercise4/plot-')
+```
+
+```{r, message=FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+library(ggthemes)
+```
+
+## Easier data wrangling
+
+- Read in the data files "mexico_deaths.csv" and "mexico_exposure.csv" from the directory called `data`. Call the dataframes `mex_deaths` and `mex_exp`.  
+- Merge the two datasets together to create the dataframe `mexico`. Exclude all columns except the outcome (deaths), date, and mean temperature. Convert the date to a date class.
+- Try combining all the steps in the previous task into one "chained" command.
+- Use this new dataframe to plot deaths by date using `ggplot`.
+
+### Example R code
+
+Read in the two datasets. Call the dataframes `mex_deaths` and `mex_exp`:
+
+```{r}
+mex_deaths <- read.csv("data/mexico_deaths.csv", header = TRUE)
+head(mex_deaths)
+
+mex_exp <- read.csv("data/mexico_exposure.csv", header = TRUE)
+head(mex_exp)
+```
+
+Merge the two datasets together to create the dataframe `mexico`. Exclude all columns except the outcome (deaths), date, and mean temperature. Convert the date to a date class. 
+
+```{r}
+mexico <- full_join(mex_deaths, mex_exp, by = "day") 
+mexico <- select(mexico, day, deaths, temp_mean)
+mexico <- mutate(mexico, day = as.Date(day, format = "%m/%d/%y"))
+```
+
+Try combining all the steps in the previous task into one "chained" command:
+
+```{r}
+mexico <- full_join(mex_deaths, mex_exp, by = "day") %>%
+        select(day, deaths, temp_mean) %>%
+        mutate(day = as.Date(day, format = "%m/%d/%y"))
+```
+
+Use this new dataframe to plot deaths by date using `ggplot`:
+
+```{r fig.width = 4, fig.height = 2.5}
+ggplot(mexico, aes(x = day, y = deaths)) + 
+        geom_point(size = 1.5, alpha = 0.5) + 
+        xlab("Date in 2008") + ylab("# of deaths") + 
+        ggtitle("Deaths by date") + 
+        theme_few()
+```
+
+## More extensive data wrangling
+
+- Read in the ebola data from the file "country_timeseries.csv" in the `data` directory into your R session. Call the dataframe `ebola`.
+- Use `dplyr` functions to create a tidy dataset. First, change it from "wide" data to "long" data. Name the new column with the key `variable` and the new column with the values `count`. 
+- Run the following code to create new columns named `type` and `country` that split up the `variable` column into type ("Cases" or "Deaths") and country ("Guinea", "Liberia", etc.). (This type of code is moving towards using regular expressions to clean up really messy data, which we'll talk about some in the third section.)
+
+```{r, eval = FALSE}
+foo <- strsplit(as.character(ebola$variable), split = "_")
+bar <- matrix(unlist(foo), ncol = 2, byrow = TRUE)
+
+ebola$type <- factor(bar[ , 1])
+ebola$country <- factor(bar[ , 2])
+```
+
+- Use `dplyr` functions and piping to remove `Day` and `variable` (now that you've split it into `type` and `country`) and to convert `Date` to a date class.
+- Use the `dplyr` function `spread()` to convert the data so you have separate columns for the two variables of numbers of `Cases` and `Deaths`.
+- Remove any observations where counts of cases or deaths are missing for that country.
+- Challenge question (you can do the next step without doing this, but your graphs won't be in order): Create a dataframe called `case_sum` that gives the total number of cases recorded for each country. (Hint: Use the `dplyr` functions `group_by()` and `summarize()`.) Use `arrange()` to re-order this dataset by the order of the number of cases, and then use this arrangement to re-order the levels in `country` in your main `ebola` dataset, so that your graphs in the next step will be ordered from the country with the most ebola cases to the one with the least.
+- Now that your data is tidy, create one plot showing ebola cases by date, faceted by country, and one showing ebola deaths by date, also faceted by country. Try using the option `scales = "free_y"` in the `facet_wrap()` function (in the `gridExtra` package) and see how that changes these graphs.
+- Based on these plots, what would your next questions be about this data before you used it for an analysis?
+- Super-challenge question: Can you put all of the steps of this cleaning process into just a few "chaining" calls? 
+
+### Example R code
+
+Read the data in using `source_data()`. (Review question: Why can't you read it directly using `read.csv()`?)
+
+```{r}
+ebola <- read.csv("data/country_timeseries.csv", header = TRUE)
+head(ebola)
+```
+
+Change the data to long data using the `gather()` function from `tidyr`:
+
+```{r}
+ebola <- gather(ebola, variable, count, -Date, -Day)
+head(ebola)
+```
+
+Split `variable` into `type` and `country`:
+
+```{r}
+foo <- strsplit(as.character(ebola$variable), split = "_")
+ebola[ , c("type", "country")] <- matrix(unlist(foo), ncol = 2, byrow = TRUE)
+
+head(ebola)
+```
+
+Use `dplyr` functions and piping to remove `Day` and `variable` and to convert `Date` to a date class:
+
+```{r}
+ebola <- select(ebola, -Day, -variable) %>%
+        mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
+head(ebola)
+```
+
+Convert the data so you have separate columns for the two variables of numbers of `Cases` and `Deaths`:
+
+```{r}
+ebola <- spread(ebola, type, count)
+head(ebola)
+```
+
+Remove any observations where counts of cases or deaths are missing for that country:
+
+```{r}
+ebola <- filter(ebola, !is.na(Cases) & !is.na(Deaths))
+head(ebola)
+```
+
+Create a dataframe called `case_sum` that gives the total number of cases recorded for each country. Use `arrange()` to re-order this dataset by the order of the number of cases:
+
+```{r}
+case_sum <- group_by(ebola, country) %>%
+        summarize(Cases = sum(Cases, na.rm = TRUE))
+case_sum
+```
+
+Use this arrangement to re-order the levels in `country` in your main `ebola` dataset, so that your graphs in the next step will be ordered from the country with the most ebola cases to the one with the least:
+
+```{r}
+case_sum <- arrange(case_sum, desc(Cases))
+case_sum
+
+levels(ebola$country)
+ebola <- mutate(ebola, 
+                country = factor(country, levels = case_sum$country))
+levels(ebola$country)
+```
+
+Now that your data is tidy, create one plot showing ebola cases by date, faceted by country, and one showing ebola deaths by date, also faceted by country:
+
+```{r fig.width = 8, fig.height = 4}
+ggplot(ebola, aes(x = Date, y = Cases)) + 
+        geom_line() + 
+        facet_wrap(~ country, ncol = 4) + 
+        theme_few()
+ggplot(ebola, aes(x = Date, y = Deaths)) + 
+        geom_line() + 
+        facet_wrap(~ country, ncol = 4) + 
+        theme_few()
+```
+
+Try using the option `scales = "free_y"` in the `facet_wrap()` function (in the `gridExtra` package) and see how that changes these graphs:
+
+```{r fig.width = 8, fig.height = 4}
+ggplot(ebola, aes(x = Date, y = Cases)) + 
+        geom_line() + 
+        facet_wrap(~ country, ncol = 4, scales = "free_y") + 
+        theme_few()
+ggplot(ebola, aes(x = Date, y = Deaths)) + 
+        geom_line() + 
+        facet_wrap(~ country, ncol = 4, scales = "free_y") + 
+        theme_few()
+```
+
+Put all of the steps of this cleaning process into just a few "chaining" calls. (Note: I'm using `sub` here instead of `strsplit` for the variable-splitting step, just to keep the code a bit cleaner. Again, this is using regular expressions, which we're cover more later in the course.)
+
+```{r, message = FALSE}
+ebola <- read.csv("data/country_timeseries.csv", header = TRUE) %>%
+        gather(variable, count, -Date, -Day) %>%
+        mutate(type = sub("_.*", "", variable),
+               country = sub(".*_", "", variable)) %>%
+        select(-Day, -variable) %>%
+        mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>%
+        spread(type, count) %>%
+        filter(!is.na(Cases) & !is.na(Deaths))
+
+case_sum <- group_by(ebola, country) %>%
+        summarize(Cases = sum(Cases, na.rm = TRUE)) %>%
+        arrange(desc(Cases))
+
+ebola <- mutate(ebola, 
+                country = factor(country, levels = case_sum$country))
+
+case_sum
+head(ebola)
+```
+

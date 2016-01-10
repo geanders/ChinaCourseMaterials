@@ -1,0 +1,116 @@
+---
+title: "In Course Exercise 3"
+author: "Brooke Anderson"
+date: "January 12, 2016"
+output: html_document
+---
+
+```{r echo = FALSE}
+knitr::opts_chunk$set(fig.path='figures/exercise4/plot-')
+```
+
+```{r, message=FALSE, echo = FALSE}
+library(knitr)
+```
+
+For this exercise, you will try to fit similar models to test the relationship between ozone pollution and cardiovascular mortality in Chicago. Try the following tasks: 
+
+- Load the `chicagoNMMAPS` data from the `dlnm` package and re-name it `chic`.
+- Use `colnames` to determine the names of all of the columns in `chic`. Using those results and the help file (`?chicagoNMMAPS`), figure out the names of the columns you will need to use for ozone concentration and cardiovascular mortality.
+- Fit an overdispersed Poisson regression model to model the association between cardiovascular deaths and daily ozone concentration. Control for day of the week, temeprature (use a spline with 3 degrees of freedom), and long-term and seasonal trends (use a spline with 6 degrees of freedom per year). Call this model `mod_ozone`. 
+- Pull the ozone coefficient from this model. What is the log relative risk of cardiovascular death associated with a 1-ppb increase in ozone concentration? What is the relative risk for a 1-ppb increase in ozone concentration?
+- Now find these associations for a 10-ppb, rather than 1-ppb, increase in ozone concentration.
+- Determine the percent increase in mortality associated with a 10-ppb increase in ozone concentration.
+- Try re-fitting the model two more times, once with 3 degrees of freedom per year and once with 12 degrees of freedom per year. What relative risk values per 10-ppb ozone do you get for these two models?
+- Try fitting the relationship using a case-crossover design. Use the `gnm` function recommended by Armstrong et al. 
+- Based on this analysis, how robust do you think the ozone-cardiovascular mortality relationship is to control for long-term and seasonal trends compared to the PM10-cardiovascular relationship?
+
+## Example code:
+
+Load the `chicagoNMMAPS` data from the `dlnm` package and re-name it `chic`.
+
+```{r}
+library(dlnm)
+data("chicagoNMMAPS")
+chic <- chicagoNMMAPS
+```
+
+Use `colnames` to determine the names of all of the columns in `chic`. Using those results and the help file (`?chicagoNMMAPS`), figure out the names of the columns you will need to use for ozone concentration and cardiovascular mortality.
+
+```{r}
+colnames(chic)
+?chicagoNMMAPS
+```
+
+You will use the `o3` column for ozone concentration and the `cvd` column for cardiovascular deaths.
+
+Fit an overdispersed Poisson regression model to model the association between cardivascular deaths and daily ozone concentration. Control for day of the week, temeprature (use a spline with 3 degrees of freedom), and long-term and seasonal trends (use a spline with 6 degrees of freedom per year). Call this model `mod_ozone`.
+
+```{r}
+library(splines) ## You need this for the ns function
+mod_ozone <- glm(cvd ~ o3 + dow + ns(temp, 3) + ns(time, 6 * 14),
+                 data = chic,
+                 family = quasipoisson(),
+                 control=glm.control(epsilon=10E-8, maxit = 10000))
+```
+
+Pull the ozone coefficient from this model. What is the log relative risk of cardiovascular death associated with a 1-ppb increase in ozone concentration? What is the relative risk for a 1-ppb increase in ozone concentration?
+
+```{r}
+o3_coef <- summary(mod_ozone)$coefficients["o3", ]
+o3_coef
+o3_coef[1] ## Log relative risk for 1-ppb increase in ozone
+exp(o3_coef[1]) ## Relative risk for 1-ppb increase in ozone
+```
+
+Now find these associations for a 10-ppb, rather than 1-ppb, increase in ozone concentration.
+
+```{r}
+10 * o3_coef[1] ## Log relative risk for 10-ppb increase in ozone
+exp(10 * o3_coef[1]) ## Relative risk for 1-ppb increase in ozone
+```
+
+Determine the percent increase in mortality associated with a 10-ppb increase in ozone concentration.
+
+```{r}
+100 * (exp(10 * o3_coef[1]) - 1)
+```
+
+There is a `r round(100 * (exp(10 * o3_coef[1]) - 1), 3)`% increase in mortality associated with a 10-ppb increase in ozone concentration.
+
+Try re-fitting the model two more times, once with 5 degrees of freedom per year and once with 10 degrees of freedom per year. What relative risk values per 10-ppb ozone do you get for these two models?
+
+```{r}
+mod_ozone_2 <- glm(cvd ~ o3 + dow + ns(temp, 3) + ns(time, 5 * 14),
+                 data = chic,
+                 family = quasipoisson(),
+                 control=glm.control(epsilon=10E-8, maxit = 10000))
+mod_ozone_3 <- glm(cvd ~ o3 + dow + ns(temp, 3) + ns(time, 10 * 14),
+                 data = chic,
+                 family = quasipoisson(),
+                 control=glm.control(epsilon=10E-8, maxit = 10000))
+
+exp(10 * coef(mod_ozone)["o3"])  ## Original model
+exp(10 * coef(mod_ozone_2)["o3"])
+exp(10 * coef(mod_ozone_3)["o3"])
+```
+
+Try fitting the relationship using a case-crossover design. Use the `gnm` function recommended by Armstrong et al. 
+
+```{r}
+library(gnm)
+chic$casecross_stratum <- format(chic$date, format = "%Y-%m-%a")
+chic$casecross_stratum <- factor(chic$casecross_stratum)
+
+mod_casecross <- gnm(cvd ~ o3 + ns(temp, 3),
+                     eliminate = casecross_stratum,
+                     data = chic,
+                     family = quasipoisson())
+
+exp(10 * coef(mod_ozone)["o3"])  ## Original model
+exp(10 * coef(mod_casecross)["o3"])
+```
+
+Based on this analysis, how robust do you think the ozone-cardiovascular mortality relationship is to control for long-term and seasonal trends compared to the PM10-cardiovascular relationship?
+
+Because there are larger differences between the different models (time series versus case-crossover), I would say that the ozone-mortality relationship is less robust (more sensitive) in this example to how you control for long-term and seasonal trends. This means that you would need to think carefully about how you control for that confounder, and you also might want to include some of this sensitivity analysis when presenting your results. The primary conclusion-- that risk of cardiovascular mortality tends to be higher when ozone concentrations are higher-- is consistent across the two models, but the exact effect size is somewhat different. 
