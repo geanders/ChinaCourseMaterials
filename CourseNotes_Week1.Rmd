@@ -113,6 +113,8 @@ nrow(daily_show)
 ncol(daily_show)
 ```
 
+# Basics of using functions
+
 ## Functions
 
 In general, functions in R take the following structure:
@@ -139,4 +141,4 @@ daily_show <- read.csv("daily_show_guests.csv",
                     header = TRUE)
 ```
 
-Find out more about a function by using `?` (e.g., ,`?head`, `?read.csv`). This will take you to the help page for the function, where you can find out all the possible arguments for the function, required and optional.
+Find out more about a function by using `?` (e.g., `?head`, `?read.csv`). This will take you to the help page for the function, where you can find out all the possible arguments for the function, required and optional.
