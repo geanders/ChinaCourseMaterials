@@ -1,14 +1,14 @@
 ---
-title: "Week 4- In Course Exercise"
+title: "In Course Exercise 2"
 author: "Brooke Anderson"
-date: "September 21, 2015"
+date: "January 12, 2016"
 output: html_document
 ---
 
-```{r echo = FALSE}
+```{r echo = FALSE, message = FALSE}
 library(knitr)
 library(ggthemes)
-knitr::opts_chunk$set(fig.path='classexercise/plot-')
+knitr::opts_chunk$set(fig.path='figures/exercise2/plot-')
 ```
 
 ## Designing a plot
@@ -24,14 +24,12 @@ library(faraway)
 data(worldcup)
 ```
 
-## Basic scatterplots with R base graphics and ggplot
+## Basic scatterplot with ggplot
 
 Perform the following tasks:
 
 - Install and load the `ggplot2` package. 
-- For the `worldcup` data, plot a scatterplot of Time (on the x-axis) versus Shots. 
-- Use some of the plotting options to make this plot a bit more attractive. 
-- Plot the same relationship using ggplot
+- For the `worldcup` data, plot a scatterplot of Time (on the x-axis) versus Shots using ggplot
 
 ### Example R code
 
@@ -42,22 +40,7 @@ Install and load the `ggplot2` package:
 library(ggplot2)
 ```
 
-Use the R base graphics to create a scatterplot of Time versus Shots:
-
-```{r, fig.width = 5, fig.height = 4}
-with(worldcup, plot(Time, Shots))
-```
-
-Use some of the plotting options to improve the graph's appearance:
-
-```{r, fig.width = 5, fig.height = 4}
-with(worldcup, plot(Time, Shots, cex = 0.5, 
-                    xlab = "Minutes played", 
-                    ylab = "Shots on goal", 
-                    main = "Time played vs. shots taken\n World Cup 2010"))
-```
-
-Create a plot of the same relationship using ggplot:
+Create a plot of the relationship using ggplot:
 
 ```{r, fig.width = 5, fig.height = 4}
 ggplot(worldcup, aes(x = Time, y = Shots)) + 
