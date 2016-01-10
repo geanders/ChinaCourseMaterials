@@ -1,5 +1,5 @@
 ---
-title: "Quiz for Week 2"
+title: "Quiz 1"
 author: ' '
 date: ' '
 output: pdf_document
@@ -29,18 +29,6 @@ d. read.csv(our_course, nrows = 2, header = TRUE)
 
 ##### 2. 
 
-Some of the faculty from Johns Hopkins' Department of Biostatistics offer courses on Data Science that you don't have to pay for through Coursera, which is a platform for Massive Open Online Courses. Further, they put all their course materials on GitHub accounts, where others can clone their repositories and modify things as they want for their own use and to share with others. Based on this information, how would you describe these courses and their associated materials?
-
-a. "Free as in beer"
-b. "Free as in speech"
-c. Both a. and b.
-d. Neither a. nor b. 
-
-> **Answer c.** 
-> Explanation: This course does not cost anything for you to take, and you can also get all of the course materials for free through GitHub. That makes it "free as in beer". Also, you can get, change, and pass along any of the materials that you want. For example, you could probably use some of these materials as a starting point if you were designing an R workshop, as long as you properly attribute where you got them from. This makes the course and materials "Free as in speech". For a bit more about Open Courseware, see check out [this](https://en.wikipedia.org/wiki/OpenCourseWare).
-
-##### 3. 
-
 If you enter the command `getwd()` at your R console, what is printed out?
 
 a. Your current working directory.
@@ -51,7 +39,7 @@ d. Your root directory.
 > **Answer a.** 
 > Explanation: If you typed `getwd` without the parentheses, you would get information about the code for the `getwd` function (although, because it's an Internal function, you wouldn't get loads of information). Answers c. or d. would only be right if you were working in, respectively, your home or root directory, but since these are only conditionally correct answers, a. is the right answer here. 
 
-##### 4.
+##### 3.
 
 You have the R package `ggplot2` saved on your computer from using it in an earlier R session. You start a new R session, and you need to use some functions from this package. What code do you need to run?
 
@@ -63,7 +51,7 @@ d. `library()`
 > **Answer b.** 
 > Explanation: Since you already have the package saved on your computer, you do not need to reinstall it, which makes Answer a. incorrect. If you just started a new R session, then the library will not be loaded in your current R session, so Answer c. is not correct. Answer d. is incorrect because, if you run `library()` without anything in the parentheses, R will give you a list of all of the available packages you could load, but to load the one you want, you need to specify which package you want to load. 
 
-##### 5.
+##### 4.
 
 Refer to the `our_course` dataframe shown in the first question. What is the only code that would **not** work if you want to print out the first four values in the `date` column?
 
@@ -75,7 +63,7 @@ d. our_course[1:4, date]
 > **Answer d.**
 > Explanation: Answer a. would work because it prints the first four rows (`head()` function with option `n = 4`) of the second column (`[ , 2]'`) of `our_course` (`date` is the second column, which is what we want). Answer b. works because it is indexing out the first four rows (`1:4` before the comma in the square brackets) and the column named `"date"` (part after the comma in the square brackets) from `our_course`. Answer c. would work because it's indexing the first four rows and second column (`[1:4, 2]`) of the `our_course` dataframe. Answer d. would only work if you had previously defined the `date` object to be the character `"date"` or the number `2` (i.e., `date <- "date"` or `date <- 2`). Otherwise, R looks for an object called `date` to use for this part of the index and can't find one. 
 
-##### 6. 
+##### 5. 
 
 Say you have a .csv file that looks like this when you open it in a text editor:
 
@@ -98,7 +86,7 @@ d. `skip = 2, nrows = 2`
 > **Answer b.**
 > Explanation: Answer b. is right because it skips two lines (the ones where I've just written some general information that I don't want R to read) and then assigns the first line after that to be the column names for the rest of the data. Answer a. is wrong because R would try to read in two rows starting from the very first line and also would assume there's not a row to give the column names. I think it would probably end up giving you two rows with one column, where each value in the column is the whole text of the line (e.g., "This is a file of data on course" would be the value in the first entry for the one column). Answer c. is wrong because R would start reading from the very first row, and so would be trying to read in some of that text about the file that doesn't make up part of the data. Answer d. is wrong because it does not let R know that the first line you're reading in is a header, plus it only reads in two of the lines you want to read in.
 
-##### 7. 
+##### 6. 
 
 What command would you use to list all the files in your current working directory?
 
@@ -110,7 +98,7 @@ d. `ls()`
 > **Answer c.**
 > Explanation: Answer a. would print your working directory pathname. Answer b. would re-set your working directory to your home directory. Answer d. would list all of the objects in your current R session, not the files in your working directory.
 
-##### 8. 
+##### 7. 
 
 Refer again to the example dataframe from Question 1. How could you find out how many observations are in this dataframe?
 
@@ -122,19 +110,7 @@ d. `ncol(our_course[1, ])`
 > **Answer b.**
 > Explanation: `dim(our_course)` will give you more information than you need-- it will give you the number of rows (observations) and columns-- but it is the right answer because it is the only one that will give you the number of observations in the full dataset. Answer a. would give you `1`, because it will only count the number of rows in the part of the dataframe you are indexing, which is just the first row (`our_course[1, ]`). Answer c is wrong because, if you use `length()` on a dataframe, it will give you the number of columns, not rows (note: `length()` could work for getting the number of observations if you have a *vector* rather than a *dataframe*. For example, `length(our_course[ , 1])`). Answer d. would give you the number of columns for the first row of the data. Observations are rows, while variables are columns, so this would work if you were trying to get the number of variables, but will not give you the number of observations. 
 
-##### 9. 
-
-When you run `install.packages("ggplot2")`, where is the package `ggplot2` being downloaded from?
-
-a. GitHub
-b. Directly from RStudio's website
-c. It's not, it's already on your computer
-d. CRAN
-
-> **Answer d.**
-> Unless you put some special options in the `install.packages()` function, it will try to get the package from CRAN and will fail if it can't find it there. 
-
-##### 10. 
+##### 8. 
 
 Where do files need to be for you to directly read them into your R session (i.e., read them in with only their file name, like `read.csv("FileName.csv", header = TRUE)`)?
 
@@ -146,14 +122,3 @@ d. Your desktop
 > **Answer c.**
 > As we discussed in class on Monday, you will need to use longer pathname to read in any file that's not in your working directory. Answers b. or d. would only be correct if your working directory were, respectively, your home directory or your working directory. To read a file from GitHub, you would need to use the `repmis` package and use a different command than `read.csv()` (also, you would need to use the full web address for the raw file on GitHub).
 
-##### 11.
-
-This is the eleventh question in the quiz. What does this mean?
-
-a. You'll need to get more questions right over all the quizzes to get full credit, because the quiz grade is determined by the percent of all questions you get correct.
-b. Having this extra question, above the 10 guaranteed for this quiz, will make it easier for you to get full credit for quiz points, because you only need to get 60 total questions right (60 * 1 / 3 = 20 points) to get full credit for the quiz part of your total course score.
-c. Any of these extra questions, beyond the 10 required on each quiz, will count as extra credit, so you could potentially get more than 20 points for the Quiz component of your final course score. 
-d. Your answer to this question doesn't matter, because any questions beyond the 10 required on each quiz will not be graded.
-
-> **Answer b.**
-> You cannot get more than 20 points on your final course grade from the quizzes. Once you have answered 60 quiz questions correctly, you will have the total possible credit for this component (60 \* 1/3 point per right question). I am guaranteeing that each quiz will have at least 10 questions, but if they have more, that's just more chances for you to get to that bar of 60 correct answers. The grade is **not** based on the percentage of all questions you get right. You can **not** get extra credit from the quizzes (just from the extra credit project).

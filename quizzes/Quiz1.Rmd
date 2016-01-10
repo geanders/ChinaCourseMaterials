@@ -1,0 +1,99 @@
+---
+title: "Quiz 1"
+author: ' '
+date: ' '
+output: pdf_document
+---
+
+##### Name: 
+
+##### 1. 
+
+You have the following dataframe saved as the R object `our_course`:
+```{r, echo = FALSE}
+our_course <- data.frame(class_session = 1:5,
+                 date = c("Aug. 24", "Aug. 31", 
+                          "Sept. 14", "Sept. 21", 
+                          "Sept. 28"))
+our_course
+```
+How would you print the first two rows at your R console?
+
+a. head(our_course)
+b. our_course[1:2]
+c. our_course[1:2, ]
+d. read.csv(our_course, nrows = 2, header = TRUE)
+
+##### 2. 
+
+If you enter the command `getwd()` at your R console, what is printed out?
+
+a. Your current working directory.
+b. The code that makes up the function `getwd()`.
+c. Your home directory. 
+d. Your root directory.
+
+##### 3.
+
+You have the R package `ggplot2` saved on your computer from using it in an earlier R session. You start a new R session, and you need to use some functions from this package. What code do you need to run?
+
+a. `install.packages("ggplot2")`
+b. `library(ggplot2)`
+c. Nothing, you're ready to go since it's already on your computer.
+d. `library()`
+
+##### 4.
+
+Refer to the `our_course` dataframe shown in the first question. What is the only code that would **not** work if you want to print out the first four values in the `date` column?
+
+a. head(our_course[ , 2], 4)
+b. our_course[1:4, "date"]
+c. our_course[1:4, 2]
+d. our_course[1:4, date]
+
+##### 5. 
+
+Say you have a .csv file that looks like this when you open it in a text editor:
+
+```
+This is a file of data on course
+meetings for R Programming
+class_session, date
+1, "Aug. 24"
+2, "Aug. 31"
+3, "Sept. 14"
+```
+
+Which options would you need to use in the `read.csv()` function to read this file into R?
+
+a. `header = FALSE, nrows = 2`
+b. `header = TRUE, skip = 2`
+c. `header = TRUE, nrows = 2`
+d. `skip = 2, nrows = 2`
+
+##### 6. 
+
+What command would you use to list all the files in your current working directory?
+
+a. `getwd()`
+b. `setwd("~")`
+c. `list.files()`
+d. `ls()`
+
+##### 7. 
+
+Refer again to the example dataframe from Question 1. How could you find out how many observations are in this dataframe?
+
+a. `nrow(our_course[1, ])`
+b. `dim(our_course)`
+c. `length(our_course)`
+d. `ncol(our_course[1, ])`
+
+##### 8. 
+
+Where do files need to be for you to directly read them into your R session (i.e., read them in with only their file name, like `read.csv("FileName.csv", header = TRUE)`)?
+
+a. My GitHub repository
+b. Your home directory
+c. Your current working directory.
+d. Your desktop
