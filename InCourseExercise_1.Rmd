@@ -7,19 +7,7 @@ output: html_document
 
 # About the dataset
 
-For today's class, you'll be using a dataset of all the guests on Jon Stewart's *The Daily Show*. This data was originally collected by Nate Silver's website, [FiveThirtyEight](http://fivethirtyeight.com) and is available on [FiveThirtyEight's GitHub page](https://github.com/fivethirtyeight/data/tree/master/daily-show-guests) under the [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/). The only change made to the original file was to add (commented) attribution information at the start of the file.
-
-**First, check out a bit more about this data and its source:**
-
-* Check out [the Creative Commons license](http://creativecommons.org/licenses/by/4.0/). What are we allowed to do with this data? What restrictions are there on using the data?
-* It's often helpful to use prior knowledge to help check out or validate your dataset. One thing we might want to know about this data is if it covers the whole time that Jon Stewart hosted *The Daily Show*. Find out the dates he started and finished as host.
-* Briefly browse around [FiveThirtyEight's GitHub data page](https://github.com/fivethirtyeight/data). What are some other datasets available that you find interesting? You can scroll to the bottom of the page to get to the compiled README.md content, which gives the full titles and links to relevant datasets. You can also click on any dataset to get more information. 
-* Look at [the GitHub page for this *Daily Show* data](https://github.com/fivethirtyeight/data/tree/master/daily-show-guests). How many columns will be in this dataset? What kind of information does the data include?
-
-If you have extra time:
-
-* Check out [the related article](http://fivethirtyeight.com/datalab/every-guest-jon-stewart-ever-had-on-the-daily-show/) on FiveThirtyEight. What are some specific questions they used this data to answer for this article?
-* Who is Nate Silver?
+For today's class, you'll be using a dataset of all the guests on Jon Stewart's *The Daily Show*. This data was originally collected by Nate Silver's website, [FiveThirtyEight](http://fivethirtyeight.com) and is available on [FiveThirtyEight's GitHub page](https://github.com/fivethirtyeight/data/tree/master/daily-show-guests). The only change made to the original file was to add (commented) attribution information at the start of the file.
 
 # Getting the data onto your computer
 
@@ -39,12 +27,12 @@ The full R code for this task might look something like:
 setwd("~")
 getwd()
 
-setwd("Desktop/RCourseFall2015/Week1_Aug24")
+setwd("Desktop/ChinaCDCRWorkshop/ChinaCourseMaterials")
 getwd()
 
-list.files()
+list.files("data")
 
-"daily_show_guests.csv" %in% list.files()
+"daily_show_guests.csv" %in% list.files("data")
 ```
 
 If you have extra time:
@@ -64,7 +52,7 @@ Now that you have the dataset in your working directory, you can read it into R.
 
 Example R code:
 ```{r}
-daily_show <- read.csv("daily_show_guests.csv",
+daily_show <- read.csv("data/daily_show_guests.csv",
                        header = TRUE,
                        skip = 4)
 ```
@@ -76,7 +64,7 @@ If you have extra time:
 
 Example R code:
 ```{r}
-daily_show_first10 <- read.csv("daily_show_guests.csv",
+daily_show_first10 <- read.csv("data/daily_show_guests.csv",
                        header = TRUE,
                        skip = 4,
                        nrows = 10)
