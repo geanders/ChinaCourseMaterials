@@ -1,5 +1,5 @@
 ---
-title: "Quiz for Week 3"
+title: "Quiz 2"
 author: ' '
 date: ' '
 output: pdf_document
@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r echo = FALSE}
 library(knitr)
-knitr::opts_chunk$set(fig.path='quiz3/plot-')
+knitr::opts_chunk$set(fig.path='quiz_figs/plot-')
 ```
 
 ##### Name: 
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(fig.path='quiz3/plot-')
 
 Your computer has the following file structure, with `"/Users/brookeanderson` as the home directory:
 
-![](../../RCourseGradedMaterials/Quizzes/figures/FileDirectoryStructure.png)
+![](../figures/FileDirectoryStructure.png)
 
 When you run:
 
@@ -199,26 +199,3 @@ d. `read.csv("ClassInfo.txt", skip = 1, header = TRUE)`
 > **Answer c**
 > Explanation: The default for `read.csv2()` is to assume that values in different columns are separated by a semi-colon, not a comma. The default for `read.csv` (Answer d.) is that commas are separators, so that works without any `sep` options. `read.delim()` (Answer a.) and `read.table()` (Answer b.) have different defaults for the separator, but you can override the default by using `sep = ","`. Remember that all of these functions are in the `read.table()` family. They all do the exact same thing underneath, they just have different defaults for things like `sep = `, so if you aren't using the one with the proper default value for that for your data, you'll just need to specify it as an option. This fact can be convenient-- instead of learning every different one, you could always use `read.table()` and just make sure you use the `sep` option to specify your separator.
 
-##### 12. 
-
-Which of the following is a **good** reason for saving an R object you've created using the `save()` command?
-
-a. You want to make sure that your object is easy for later researchers to open and read, even if they don't have access to R
-b. There are no good reasons for ever saving an R object using `save()`
-c. The object is really small, so it's not worth the effort of reading it in from a flat file, like a `.csv`, every time you want to use it
-d. You've created an object, like a model object, that doesn't have a 2-D structure (i.e., rows and columns), so it doesn't fit well into a flat file, but you want to share it with other people
-
-> **Answer d.** 
-> Explanation: It is very tricky to save things that don't have a 1-D (i.e., vector) or 2-D (i.e., dataframe or matrix) structure as flatfiles. If your datafile is small (Answer c.), your computer can read it into R very quickly, so for the sake of fully reproducible code, it's useful to read it in directly from the flat file (e.g., csv) every time. R files (`.RData`) don't make any sense if you open them with a text editor; they only make sense if you load them from R. Therefore, if later researchers did not have access to R software, they may not be able to read any files saved as `.RData` files (Answer a.).
-
-##### 13.
-
-Which of the following vector classes is the only one that R does **not**, at some level, store using numerical values?
-
-a. factor
-b. Date
-c. character
-d. logical
-
-> **Answer c.**
-> Explanation: R stores factors (Answer a.) underneath as numbers. For example, try `as.numeric(factor(c("yes", "no", "yes")))`. It is important to know this, because occasionally R will do something that you didn't expect it to with a factor, and the underlying numerical structure is often the culprit. R stores date (Answer b.) as numerics of the number of days since some origin date (Jan 1, 1970, I think). R stores logical vectors (Answer d.) as FALSE = 0 and TRUE = 1.
