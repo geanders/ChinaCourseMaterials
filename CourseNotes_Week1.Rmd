@@ -3,7 +3,7 @@ title: "Preliminaries in R"
 author: "Brooke Anderson, Assistant Professor of Epidemiology"
 job: Colorado State University
 logo        : figures/CSU_ram.png
-date: "August 24, 2015"
+date: "January 12, 2016"
 output: ioslides_presentation
 framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
 highlighter : highlight.js  # {highlight.js, prettify, highlight}
@@ -11,171 +11,7 @@ hitheme     : tomorrow      #
 mode        : selfcontained # {standalone, draft}
 ---
 
-# R and RStudio
-
-## What is R?
-
-- A statistical programming language
-- Open-source
-- A core package with many available user-created add-ons (packages)
-
-## What is R?
-
-Currently popular in a number of fields, including:
-
-- Statistics
-- Machine learning
-- Data journalism / Data analysis
-
-## What is R?
-
-> "The best thing about R is that it was developed by statisticians. The worst thing about R is that... it was developed by statisticians."
-
-> -Bo Cowgill, Google, at the Bay Area R Users Group
-
-## Gratis vs. libre
-
-- Gratis: Free as in beer
-- Libre: Free as in speech
-
-With open-source software (free as in speech), you can:
-
-- Check out the code to figure out how the software works
-- Share the code (and software) with other people
-- Make any changes you want to the code
-
-## What is RStudio?
-
-RStudio is a user interface for R. You download it separately, but it's a "nicer" way to work in R. 
-
-RStudio (the company) currently:
-
-- Develops and freely provides the RStudio IDE
-- Provides excellent resources for learning and using R (cheatsheets, )
-- Is producing some of the most-used R packages
-- Employees some of the top people in R development
-
-## Setting up
-
-If do not already have them, you will need to download and install both R and RStudio. 
-
-- Go to [CRAN](https://cran.r-project.org) and download the latest version of R for your system. Install.
-- Go to the [RStudio download page](https://www.rstudio.com/products/rstudio/download/) and download the latest version of RStudio for your system. Install. 
-- Defaults should be fine for everything.
-
-# The "package" system
-
-## R packages
-
-Your original download of R is only a starting point:
-
-<img src="figures/BrioBasicSet.jpg" width="400" />
-
-## R packages
-
-To take full advantage of R, you'll want to add on packages:
-
-<img src="figures/BrioFancySet.jpg" width="800" />
-
-## R packages
-
-You can get packages to add-on to your version of R from:
-
-- CRAN (currently 7050 available packages)
-- GitHub
-- Your friends and collaborators
-- Make them yourself
-
-## Installing from CRAN
-
-The most popular place from which to get packages is currently CRAN. You can install packages from CRAN using R code. 
-
-<img src="figures/telephone_keypad.png" width="150" />
-
-For example, to get the package `phonenumber`, you could use:
-
-```{r, eval = FALSE}
-install.packages("phonenumber")
-```
-
-## Loading an installed package
-
-Once you have a package, you can load it to an R session using the `library()` function. 
-
-```{r}
-library("phonenumber")
-```
-
-Once it's loaded, you can use all its functions.
-
-```{r}
-fedex_number <- "GoFedEx"
-letterToNumber(fedex_number)
-```
-
-# Some basics of R code
-
-## R's MVP: <-
-
-`<-` is R's assignment operator. It takes whatever you've created on the right hand side of the `<-` and saves it as an object with the name you put on the left hand side of the `<-` : 
-
-```{r eval = FALSE}
-## Note: Generic code-- this will not work
-[name of object] <- [thing I want to save]
-```
-
-## R's MVP: <-
-
-For example, if I just type `"GoFedEx"`, R will print it back to me, but won't save it anywhere for me to use later:
-
-```{r}
-"GoFedEx"
-```
-
-## R's MVP: <-
-
-However, if I assign it to an object, I can print it out or use it later by referencing that object name:
-
-```{r}
-fedex_number <- "GoFedEx"
-fedex_number
-letterToNumber(fedex_number)
-```
-
-## <- vs. =
-
-You can make assignments using either `<-` or `=`, and you'll see both when you're reading other people's code. 
-
-However, R gurus advise using `<-` in your own code, and as you move to doing more complex things, problems might crop up if you use `=`. 
-
-## <- vs. =
-
-For now, though, it will be helpful for you to know that these two calls do the same thing:
-
-```{r}
-one_to_ten <- 1:10
-one_to_ten
-
-one_to_ten = 1:10
-one_to_ten
-```
-
-## Naming objects
-
-> “There are only two hard things in Computer Science: cache invalidation and naming things.”
-
-> — Phil Karlton
-
-## Naming objects
-
-- Use only letters, numbers, and underscores
-- Don't start with anything but a letter
-
-*From [Hadley Wickham's R style guide](http://adv-r.had.co.nz/Style.html)*
-
-- Use lower case for variable names (`fedex_number`, not `FedExNumber`)
-- Use an underscore as a separator (`fedex_number`, not `fedex.number` or `fedexNumber`)
-- Avoid using names that are already defined in R (e.g., don't name an object `mean`, because as `mean` function exists)
+# R object types
 
 ## R's most basic object types
 
@@ -261,7 +97,7 @@ fibonacci_seq[5, ] # Last row, all columns
 Usually, instead of creating a dataframe from vectors, you'll read one in from data on an outside file. For example, to read in a dataset from a CSV file called `daily_show_guests.csv`:
 
 ```{r}
-daily_show <- read.csv("daily_show_guests.csv",
+daily_show <- read.csv("data/daily_show_guests.csv",
                        header = TRUE,
                        skip = 4)
 daily_show[1:2, ]
