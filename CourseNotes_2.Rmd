@@ -1,5 +1,5 @@
 ---
-title: "Plotting"
+title: "Course Notes 2"
 author: "Brooke Anderson, Assistant Professor of Epidemiology"
 job: Colorado State University
 logo        : figures/CSU_ram.png

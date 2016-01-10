@@ -1,0 +1,272 @@
+---
+title: "Course Notes 4"
+author: "Brooke Anderson, Assistant Professor of Epidemiology"
+job: Colorado State University
+logo        : figures/CSU_ram.png
+date: "January 12, 2016"
+output: ioslides_presentation
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+mode        : selfcontained # {standalone, draft}
+---
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(fig.path='coursenotes/plot-')
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(faraway)
+data(worldcup)
+data(nepali)
+```
+
+# Data wrangling
+
+## Data wrangling
+
+- Data cleaning
+- Data wrangling
+- Data munging
+
+## Data wrangling packages
+
+- `dplyr`: Working with a single dataset
+- `tidyr`: Combining datasets
+
+Tips on both in RStudio's [Data Wrangling Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+
+## Data wrangling
+
+Learning these tools will take practice. For more examples, see:
+
+- [dplyr tutorial](http://genomicsclass.github.io/book/pages/dplyr_tutorial.html)
+- [RStudio intro to dplyr](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html)
+- [dplyr intro](http://www.sharpsightlabs.com/dplyr-intro-data-manipulation-with-r/)
+
+## `dplyr`
+
+- `select`: Select certain columns
+- `filter`: Select certain rows (like `subset`)
+- `mutate`: Create a new variable
+- `summarize`: Summarize data (either by a variable or overall)
+- `group_by`: Group data by a variable
+- `arrange`: Re-order data
+
+## `select`
+
+Select certain columns:
+
+```{r}
+nepali[1:2, ]
+select(nepali, id, sex, wt, ht, age)[1:2, ]
+```
+
+## `select`
+
+Use `-` to exclude columns:
+
+```{r}
+nepali[1:2, ]
+select(nepali, -mage, -lit, -died, -alive)[1:2, ]
+```
+
+## `filter`
+
+Select certain rows (like `subset`):
+
+```{r}
+nepali[1:2, ]
+filter(nepali, sex == 2)[1:2, ]
+```
+
+## `mutate`
+
+Create a new variable:
+
+```{r}
+nepali[1:2, ]
+mutate(nepali, ht_wt_ratio = ht / wt)[1:2, ]
+```
+
+## `summarize`
+
+Summarize data overall:
+
+```{r}
+nepali[1:2, ]
+summarize(nepali,
+          wt = mean(wt, na.rm = TRUE),
+          ht = mean(ht, na.rm = TRUE))
+```
+
+## `group_by` and `summarize`
+
+Summarize data by group:
+
+```{r}
+nepali[1:2, ]
+summarize(group_by(nepali, id),
+          wt = mean(wt, na.rm = TRUE),
+          ht = mean(ht, na.rm = TRUE))[1:2, ]
+```
+
+## `arrange`
+
+Re-order data:
+
+```{r}
+nepali[1:2, ]
+arrange(nepali, desc(wt))[1:2, ]
+```
+
+## `gather` / `spread`
+
+You can also use two functions from the `tidyr` package to change between wide and long data: `gather()` and `spread()`. (Example from `tidyr` help files.)
+
+Here is some wide data:
+
+```{r, include = FALSE}
+wide_stocks <- data.frame(
+  time = as.Date('2009-01-01') + 0:9,
+  X = rnorm(10, 0, 1),
+  Y = rnorm(10, 0, 2),
+  Z = rnorm(10, 0, 4)
+)
+```
+
+```{r}
+wide_stocks[1:3, ]
+```
+
+## `gather` / `spread`
+
+`gather` to convert wide data to long data:
+
+```{r}
+long_stocks <- gather(wide_stocks, stock, price, -time)
+long_stocks[1:5, ]
+```
+
+
+## `gather` / `spread`
+
+`spread` to convert long data to wide data:
+
+```{r}
+stocks <- spread(long_stocks, stock, price)
+stocks[1:5, ]
+```
+
+## Chaining / piping
+
+To write cleaner code, `dplyr` includes the option to "pipe" or "chain" using `%>%`. This sends the output from the function before the `%>%` in as input to the function after the `%>%`.
+
+For example:
+
+```{r}
+group_by(worldcup, Team) %>%
+        summarize(max_time = max(Time)) %>%
+        filter(max_time > 520)
+```
+
+# Using `dplyr` functions to tidy data
+
+## Tidy `nepali` data
+
+Say we wanted to tidy up the data by:
+
+- Move variables that are constant for each child across all measurements (e.g., `mage`, `lit`, `died`, `alive`) to another dataset
+- Determine each child's age at first measurement
+- Limit the measurement dataset with just males
+- Add new variables for (1) height-to-weight ratio and (2) months since first measurement
+
+## Tidy `nepali` data
+
+Move variables that are constant for each child across all measurements (e.g., `mage`, `lit`, `died`, `alive`) to another dataset:
+
+```{r}
+child_constants <- select(nepali, id, mage, lit, died, alive) %>%
+        group_by(id) %>%
+        summarize(mage = mean(mage), lit = mean(lit), 
+                  died = mean(died), alive = mean(alive))
+child_constants[1:2, ]
+```
+
+## Tidy `nepali` data
+
+Determine each child's age at first measurement:
+
+```{r}
+first_age <- group_by(nepali, id) %>%
+        summarize(first_age = min(age))
+first_age[1:2, ]
+```
+
+## Tidy `nepali` data
+
+- Limit the measurement dataset with just males
+- Add new variables for (1) height-to-weight ratio and (2) months since first measurement
+
+```{r}
+child_measures <- select(nepali, -mage, -lit, -died, -alive) %>%
+        filter(sex == 1) %>%
+        left_join(first_age, by = "id") %>%
+        mutate(ht_wt_ratio = ht / wt, 
+               months = age - first_age)
+
+child_measures[1:2, ]
+```
+
+# `*_join` functions
+
+## `*_join` functions
+
+The `dplyr` package has a family of different functions to join two dataframes together. All combine two dataframes, which I'll call `x` and `y` here. The functions include:
+
+- `inner_join(x, y)`: Keep only rows where there are observations in both `x` and `y`.
+- `left_join(x, y)`: Keep all rows from `x`, whether they have a match in `y` or not. 
+- `right_join(x, y)`: Keep all rows from `y`, whether they have a match in `x` or not. 
+- `full_join(x, y)`: Keep all rows from both `x` and `y`, whether they have a match in the other dataset or not.
+
+## `*_join` functions
+
+```{r}
+(x <- data.frame(course = c("x", "y", "z"),
+                grade = c(90, 82, 78)))
+(y <- data.frame(course = c("w", "x", "y"),
+                day = c("Tues", "Mon / Fri", "Tue")))
+```
+
+## `*_join` functions
+
+With `inner_join`, you'll lose data on `z` (only in the first dataset) and `w` (only in the second dataset). You'll only get the observations that show up in both datasets:
+
+```{r warning = FALSE}
+inner_join(x, y)
+```
+
+## `*_join` functions
+
+With `left_join`, you'll keep everything in `x` (the "left" dataset), but not keep things in `y` that don't match something in `x`. That means that, here, you'll lose `w`:
+
+```{r, warning = FALSE}
+left_join(x, y)
+```
+
+## `*_join` functions
+
+`right_join` is the opposite:
+
+```{r, warning = FALSE}
+right_join(x, y)
+```
+
+## `*_join` functions
+
+`full_join` keeps everything from both datasets:
+
+```{r warning = FALSE}
+full_join(x, y)
+```

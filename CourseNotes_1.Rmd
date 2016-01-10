@@ -1,5 +1,5 @@
 ---
-title: "Entering / cleaning data 1"
+title: "Course Notes 1"
 author: "Brooke Anderson, Assistant Professor of Epidemiology"
 job: Colorado State University
 logo        : figures/CSU_ram.png
