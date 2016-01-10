@@ -80,16 +80,13 @@ img {
 </div>
 <div id="getting-the-data-onto-your-computer" class="section level1">
 <h1>Getting the data onto your computer</h1>
-<p>First, create a new R script file to put all the code you use for this exercise.</p>
-<p>Next, download the data from GitHub onto your computer. Put it in your directory (folder) for this course.</p>
-<p><strong>Take the following steps to get the data onto your computer</strong></p>
 <ul>
-<li>If you do not yet have a directory (folder) just for this course, make one someplace straightforward like in your home directory.</li>
-<li>Download the file <a href="https://github.com/geanders/RCourseFall2015/blob/master/Week1_Aug24/daily_show_guests.csv">from GitHub</a>. Right click on <code>Raw</code> and then choose “Download linked file”. Put the file into the directory you created for this course.</li>
+<li>First, create a new R script file to put all the code you use for this exercise.</li>
+<li>Next, you should have downloaded all the course materials, which include this data, from GitHub onto your computer. If you have not, then go to <a href="https://github.com/geanders/ChinaCourseMaterials">the course GitHub repository</a> and click on “Download ZIP”. This may take a few minutes, but it will download a compressed folder to your computer with all the course materials inside. Un-zip the file to get access to all the files (Mac computers will automatically do this when you click on the file).</li>
 <li>Find out what your home directory is in R. To do this, make sure R is set to your home directory using <code>setwd(&quot;~&quot;)</code>, and then get R to print that home directory path using <code>getwd()</code>.</li>
-<li>Outside of R, open Finder (or your system’s equivalent). Go to your home directory (mine, for example, is <code>/Users/brookeanderson</code>). Figure out home to get from this to the directory you created for this course. For example, from my home directory, I would go <code>Desktop</code> to <code>RCourseFall2015</code> to <code>Week1_Aug24</code>.</li>
-<li>Go back into R. Set R’s working directory to your directory for this class using the <code>setwd()</code> command, now that you know the pathname for the directory. For example, I would use <code>setwd(&quot;Desktop/RCourseFall2015/Week1_Aug24&quot;)</code>.</li>
-<li>Use the <code>list.files()</code> command to make sure that the <code>daily_show_guests.csv</code> file is in your current working directory.</li>
+<li>Outside of R, open Finder (or your system’s equivalent). Go to your home directory (mine, for example, is <code>/Users/brookeanderson</code>). Figure out home to get from this to the directory you downloaded from GitHub for this course. For example, from my home directory, I would go <code>Desktop</code> to <code>ChinaCDCRWorkshop</code> to <code>ChinaCourseMaterials</code>.</li>
+<li>Go back into R. Set R’s working directory to your directory for this class using the <code>setwd()</code> command, now that you know the pathname for the directory. For example, I would use <code>setwd(&quot;Desktop/ChinaCDCRWorkshop/ChinaCourseMaterials&quot;)</code>.</li>
+<li>Use the <code>list.files()</code> command to make sure that the <code>daily_show_guests.csv</code> file is in the <code>data</code> subdirectory of your current working directory.</li>
 </ul>
 <p>The full R code for this task might look something like:</p>
 <pre class="r"><code>setwd(&quot;~&quot;)
@@ -99,15 +96,22 @@ getwd()</code></pre>
 getwd()</code></pre>
 <pre><code>## [1] &quot;/Users/brookeanderson/Desktop/ChinaCDCRWorkshop/ChinaCourseMaterials&quot;</code></pre>
 <pre class="r"><code>list.files()</code></pre>
-<pre><code>## [1] &quot;ChinaCourseMaterials.Rproj&quot; &quot;CourseNotes_1.html&quot;        
-## [3] &quot;CourseNotes_1.Rmd&quot;          &quot;data&quot;                      
-## [5] &quot;figures&quot;                    &quot;InCourseExercise_1.html&quot;   
-## [7] &quot;InCourseExercise_1.Rmd&quot;     &quot;quizzes&quot;</code></pre>
+<pre><code>##  [1] &quot;ChinaCourseMaterials.Rproj&quot; &quot;CourseNotes_1.html&quot;        
+##  [3] &quot;CourseNotes_1.Rmd&quot;          &quot;CourseNotes_2.html&quot;        
+##  [5] &quot;CourseNotes_2.Rmd&quot;          &quot;CourseNotes_3.html&quot;        
+##  [7] &quot;CourseNotes_3.Rmd&quot;          &quot;CourseNotes_4.html&quot;        
+##  [9] &quot;CourseNotes_4.Rmd&quot;          &quot;data&quot;                      
+## [11] &quot;figures&quot;                    &quot;InCourseExercise_1.html&quot;   
+## [13] &quot;InCourseExercise_1.Rmd&quot;     &quot;InCourseExercise_2.html&quot;   
+## [15] &quot;InCourseExercise_2.Rmd&quot;     &quot;InCourseExercise_3.html&quot;   
+## [17] &quot;InCourseExercise_3.Rmd&quot;     &quot;InCourseExercise_4.html&quot;   
+## [19] &quot;InCourseExercise_4.Rmd&quot;     &quot;quizzes&quot;</code></pre>
 <pre class="r"><code>list.files(&quot;data&quot;)</code></pre>
-<pre><code>## [1] &quot;country_timeseries.csv&quot;  &quot;daily_show_guests.csv&quot;  
-## [3] &quot;deaths-weather.csv&quot;      &quot;icd-10.xls&quot;             
-## [5] &quot;ICU_Data_Code_Sheet.pdf&quot; &quot;icu.sas7bdat&quot;           
-## [7] &quot;ld_genetics.txt&quot;         &quot;measles_data&quot;</code></pre>
+<pre><code>##  [1] &quot;country_timeseries.csv&quot;  &quot;daily_show_guests.csv&quot;  
+##  [3] &quot;deaths-weather.csv&quot;      &quot;icd-10.xls&quot;             
+##  [5] &quot;ICU_Data_Code_Sheet.pdf&quot; &quot;icu.sas7bdat&quot;           
+##  [7] &quot;ld_genetics.txt&quot;         &quot;measles_data&quot;           
+##  [9] &quot;mexico_deaths.csv&quot;       &quot;mexico_exposure.csv&quot;</code></pre>
 <pre class="r"><code>&quot;daily_show_guests.csv&quot; %in% list.files(&quot;data&quot;)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <p>If you have extra time:</p>

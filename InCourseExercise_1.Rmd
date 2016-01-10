@@ -11,18 +11,12 @@ For today's class, you'll be using a dataset of all the guests on Jon Stewart's 
 
 # Getting the data onto your computer
 
-First, create a new R script file to put all the code you use for this exercise.
-
-Next, download the data from GitHub onto your computer. Put it in your directory (folder) for this course. 
-
-**Take the following steps to get the data onto your computer**
-
-* If you do not yet have a directory (folder) just for this course, make one someplace straightforward like in your home directory.
-* Download the file [from GitHub](https://github.com/geanders/RCourseFall2015/blob/master/Week1_Aug24/daily_show_guests.csv). Right click on `Raw` and then choose "Download linked file". Put the file into the directory you created for this course. 
+* First, create a new R script file to put all the code you use for this exercise.
+* Next, you should have downloaded all the course materials, which include this data, from GitHub onto your computer. If you have not, then go to [the course GitHub repository](https://github.com/geanders/ChinaCourseMaterials) and click on "Download ZIP". This may take a few minutes, but it will download a compressed folder to your computer with all the course materials inside. Un-zip the file to get access to all the files (Mac computers will automatically do this when you click on the file). 
 * Find out what your home directory is in R. To do this, make sure R is set to your home directory using `setwd("~")`, and then get R to print that home directory path using `getwd()`.
-* Outside of R, open Finder (or your system's equivalent). Go to your home directory (mine, for example, is `/Users/brookeanderson`). Figure out home to get from this to the directory you created for this course. For example, from my home directory, I would go `Desktop` to `RCourseFall2015` to `Week1_Aug24`. 
-* Go back into R. Set R's working directory to your directory for this class using the `setwd()` command, now that you know the pathname for the directory. For example, I would use `setwd("Desktop/RCourseFall2015/Week1_Aug24")`. 
-* Use the `list.files()` command to make sure that the `daily_show_guests.csv` file is in your current working directory.
+* Outside of R, open Finder (or your system's equivalent). Go to your home directory (mine, for example, is `/Users/brookeanderson`). Figure out home to get from this to the directory you downloaded from GitHub for this course. For example, from my home directory, I would go `Desktop` to `ChinaCDCRWorkshop` to `ChinaCourseMaterials`. 
+* Go back into R. Set R's working directory to your directory for this class using the `setwd()` command, now that you know the pathname for the directory. For example, I would use `setwd("Desktop/ChinaCDCRWorkshop/ChinaCourseMaterials")`. 
+* Use the `list.files()` command to make sure that the `daily_show_guests.csv` file is in the `data` subdirectory of your current working directory.
 
 The full R code for this task might look something like:
 ```{r}
