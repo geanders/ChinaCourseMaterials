@@ -1,0 +1,521 @@
+---
+title: "Course Notes 5"
+author: "Brooke Anderson, Assistant Professor of Epidemiology"
+job: Colorado State University
+logo        : figures/CSU_ram.png
+date: "January 12, 2016"
+output: ioslides_presentation
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+mode        : selfcontained # {standalone, draft}
+---
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(fig.path='figures/notes5/plot-')
+
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggthemes)
+library(faraway)
+data(worldcup)
+data(nepali)
+```
+
+# Parentheses
+
+## Parentheses
+
+If you put parentheses around an entire code statement, it will both run the code and print out the answer.
+
+```{r}
+my_names <- c("Reeves", "Brooke", "Cord")
+my_names
+
+(my_names <- c("Reeves", "Brooke", "Cord"))
+```
+
+# Loops
+
+## Loops
+
+For *some index* in *some vector*, do *some code*.
+
+For `i` in `1:3`, `print(i)`:
+
+```{r}
+for(i in 1:3){
+        print(i)
+}
+```
+
+## Loops
+
+For *some index* in *some vector*, do *some code*.
+
+For `name` in `my_names`, `print(name)`:
+
+```{r}
+my_names <- c("Reeves", "Brooke", "Cord")
+for(name in my_names){
+        print(name)
+}
+```
+
+## Loops
+
+Often, it's convenient to use `i` loop through a vector or dataframe using indexing.
+
+For `i` in `1:length(my_names)`, `print(my_names[i])`:
+
+```{r}
+my_names <- c("Reeves", "Brooke", "Cord")
+for(i in 1:length(my_names)){
+        print(my_names[i])
+}
+```
+
+## Loops
+
+What would this loop do?
+
+```{r, eval = FALSE}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+for(i in 1:length(vars)){
+        var_mean <- mean(worldcup[ , vars[i]])
+        print(var_mean)
+}
+```
+
+## Loops
+
+```{r}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+for(i in 1:length(vars)){
+        var_mean <- mean(worldcup[ , vars[i]])
+        print(var_mean)
+}
+```
+
+## Loops
+
+What would this loop do?
+
+```{r, eval = FALSE}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+for(i in 1:length(vars)){
+        var_mean <- mean(worldcup[ , vars[i]])
+        var_mean <- round(var_mean, 1)
+        out <- paste0("mean of ", vars[i], ": ", var_mean)
+        print(out)
+}
+```
+
+## Loops
+
+To figure out, you can set `i <- 1` and then walk through the loop:
+
+```{r}
+i <- 1
+(var_mean <- mean(worldcup[ , vars[i]]))
+(var_mean <- round(var_mean, 1))
+(out <- paste0("mean of ", vars[i], ": ", var_mean))
+```
+
+## Loops
+
+```{r}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+for(i in 1:length(vars)){
+        var_mean <- mean(worldcup[ , vars[i]])
+        var_mean <- round(var_mean, 1)
+        out <- paste0("mean of ", vars[i], ": ", var_mean)
+        print(out)
+}
+```
+
+## Loops
+
+Often, it's convenient to create a dataset to fill up as you loop through:
+
+```{r, eval = FALSE}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+my_df <- data.frame(variable = vars, mean = NA)
+for(i in 1:nrow(my_df)){
+        var_mean <- mean(worldcup[ , vars[i]])
+        my_df[i , "mean"] <- round(var_mean, 1)
+}
+```
+
+## Loops
+
+```{r}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+(my_df <- data.frame(variable = vars, mean = NA))
+```
+
+## Loops
+```{r}
+i <- 1
+(var_mean <- mean(worldcup[ , vars[i]]))
+my_df[i , "mean"] <- round(var_mean, 1)
+my_df
+```
+
+## Loops
+
+```{r}
+for(i in 1:nrow(my_df)){
+        var_mean <- mean(worldcup[ , vars[i]])
+        my_df[i , "mean"] <- round(var_mean, 1)
+}
+my_df
+```
+
+## Loops
+
+Note: This is a pretty simplistic example. There are some easier ways to have done this:
+
+```{r}
+summarize(worldcup, Time = mean(Time), 
+          Passes = mean(Passes), Tackles = mean(Tackles),
+          Saves = mean(Saves)) %>%
+        gather(var, mean) %>%
+        mutate(mean = round(mean, 1))
+```
+
+## Loops
+
+Note: This is a pretty simplistic example. There are some easier ways to have done this:
+
+```{r}
+means <- apply(worldcup[ , vars], 2, mean)
+(means <- round(means, 1))
+```
+
+However, you can use this same looping process for much more complex tasks that you can't do as easily with `apply` or `dplyr` tools.
+
+## Loops
+
+Loops can be very useful for more complex repeated tasks. For example:
+
+```{r, echo = FALSE, fig.width = 6, fig.height = 4}
+positions <- unique(worldcup$Position)
+pos_est <- data.frame(position = positions, est = NA, se = NA)
+
+for(i in 1:nrow(pos_est)){
+        pos_df <- subset(worldcup, Position == positions[i]) 
+        pos_mod <- glm(Passes ~ Time,
+                       data = pos_df,
+                       family = poisson(link = "log"))
+        pos_coefs <- summary(pos_mod)$coefficients["Time", 1:2]
+        pos_est[i, c("est", "se")] <- pos_coefs
+}
+
+pos_est$lower_ci <- with(pos_est, est - 1.96 * se)
+pos_est$upper_ci <- with(pos_est, est + 1.96 * se)
+
+rr_per90 <- function(est){
+        out <- exp(est * 90)
+        return(out)
+}
+
+pos_est[ , c("rr_est", "rr_low", "rr_high")] <- 
+        apply(pos_est[ , c("est", "lower_ci", "upper_ci")], 2, rr_per90)
+
+pos_est <- arrange(pos_est, rr_est) %>%
+        mutate(position = factor(position, levels = position))
+
+ggplot(pos_est, aes(x = rr_low, y = position)) + 
+        geom_segment(aes(xend = rr_high, yend = position)) + 
+        geom_point(aes(x = rr_est, y = position)) + 
+        theme_few() + 
+        ylab("") + 
+        scale_x_continuous("Relative rate of passes\nper 90 minute increase in minutes played",
+                           limits = c(1.0, max(pos_est$rr_high))) + 
+        geom_vline(aes(xintercept = 1), color = "lightgray")
+```
+
+## Loops
+
+Creating this graph requires: 
+
+- Create a subset limited to each of the four positions
+- Fit a Poisson regression of Passes on Time within each subset
+- Pull the regression coefficient and standard error from each model
+- Use those values to calculate 95% confidence intervals
+- Convert everything from log relative rate to relative rate
+- Plot everything
+
+## Loops
+
+Create a vector with the names of all positions. Create an empty dataframe to store regression results.
+
+```{r}
+(positions <- unique(worldcup$Position))
+(pos_est <- data.frame(position = positions, est = NA, se = NA))
+```
+
+## Loops
+
+Loop through and fit a Poisson regression model for each subset of data. Save regression coefficients in the empty dataframe.
+
+```{r}
+for(i in 1:nrow(pos_est)){
+        pos_df <- subset(worldcup, Position == positions[i]) 
+        pos_mod <- glm(Passes ~ Time,
+                       data = pos_df,
+                       family = poisson(link = "log"))
+        pos_coefs <- summary(pos_mod)$coefficients["Time", 1:2]
+        pos_est[i, c("est", "se")] <- pos_coefs
+}
+pos_est[1:2, ]
+```
+
+## Loops
+
+Calculate 95% confidence intervals for log relative risk values.
+
+```{r}
+pos_est$lower_ci <- with(pos_est, est - 1.96 * se)
+pos_est$upper_ci <- with(pos_est, est + 1.96 * se)
+pos_est[1:2, ]
+```
+
+## Loops
+
+Calculate relative risk per 90 minute increase in minutes played. 
+
+```{r}
+pos_est[ , c("rr_est", "rr_low", "rr_high")] <- 
+        exp(90 * pos_est[ , c("est", "lower_ci", "upper_ci")])
+pos_est[1:2, ]
+```
+
+## Loops
+
+Re-level the `position` factor so the plot will be ordered from highest to lowest estimates.
+
+```{r}
+pos_est <- arrange(pos_est, rr_est) %>%
+        mutate(position = factor(position, levels = position))
+pos_est
+```
+
+## Loops
+
+Create the plot.
+
+```{r, eval = FALSE}
+ggplot(pos_est, aes(x = rr_low, y = position)) + 
+        geom_segment(aes(xend = rr_high, yend = position)) + 
+        geom_point(aes(x = rr_est, y = position)) + 
+        theme_few() + 
+        ylab("") + 
+        scale_x_continuous(paste("Relative rate of passes\nper",
+                                 "90 minute increase in minutes played"),
+                           limits = c(1.0, max(pos_est$rr_high))) + 
+        geom_vline(aes(xintercept = 1), color = "lightgray")
+```
+
+## Loops
+
+```{r, echo = FALSE, fig.width = 6, fig.height = 4}
+ggplot(pos_est, aes(x = rr_low, y = position)) + 
+        geom_segment(aes(xend = rr_high, yend = position)) + 
+        geom_point(aes(x = rr_est, y = position)) + 
+        theme_few() + 
+        ylab("") + 
+        scale_x_continuous(paste("Relative rate of passes\nper",
+                                 "90 minute increase in minutes played"),
+                           limits = c(1.0, max(pos_est$rr_high))) + 
+        geom_vline(aes(xintercept = 1), color = "lightgray")
+```
+
+## Functions
+
+You can write your own functions for tasks you do a lot. If you find yourself cutting and pasting a lot, convert the code to a function.
+
+```{r}
+add_one <- function(number){
+        out <- number + 1
+        return(out)
+}
+
+add_one(number = 3)
+add_one(number = -1)
+```
+
+## Functions
+
+You can name a function anything you want (although try to avoid names of pre-existing functions). You then include options (including any defaults) and the code to run:
+
+```{r, eval = FALSE}
+## Note: this code will not run
+[function name] <- function([any options and defaults]){
+        [code to run]
+}
+```
+
+## Functions
+
+Example: You want to take a log relative rate estimate determined per minute and convert it to a relative rate per 90 minutes.
+
+```{r}
+rr_per90 <- function(log_rr){
+        out <- exp(log_rr * 90)
+        return(out)
+}
+rr_per90(pos_est$est[1])
+```
+
+## Functions
+
+Example: You want to take a vector of values for a log relative rate estimate and its standard error and convert it to a pretty format of relative rate and confidence intervals per 90 minute increase in playing time:
+
+```{r}
+pretty_rr90 <- function(vec){
+        ests <- vec[1] + c(0, -1, 1) * 1.96 * vec[2]
+        ests <- round(exp(90 * ests), 2)
+        out <- paste0(ests[1], " (", ests[2], ", ", ests[3], ")")
+        return(out)
+}
+pretty_rr90(c(0.0031, 0.00017))
+```
+
+## Functions
+
+You can test out functions by walking through them, just like you can with loops.
+
+```{r}
+vec <- c(0.0031, 0.00017)
+(ests <- vec[1] + c(0, -1, 1) * 1.96 * vec[2])
+(ests <- round(exp(90 * ests), 2))
+(out <- paste0(ests[1], " (", ests[2], ", ", ests[3], ")"))
+```
+
+## Functions
+
+You can use `apply` to apply a function you've created to many rows at a time. For example, you have log relative risk estimates and standard errors for each position in `pos_est`:
+
+```{r}
+pos_est[ , c("est", "se")]
+```
+
+## Functions
+
+You can apply `pretty_rr90` to each row (`MARGIN = 1`) of this part of the dataframe to get pretty estimates for each position:
+
+```{r}
+apply(pos_est[ , c("est", "se")], MARGIN = 1, FUN = pretty_rr90)
+```
+
+## Functions
+
+You can use this to create a table to print:
+
+```{r}
+out_tab <- data.frame("Position" = pos_est$position,
+                      "Effect Estimate" = apply(pos_est[ , c("est", "se")],
+                                                MARGIN = 1,
+                                                FUN = pretty_rr90))
+out_tab
+```
+
+# Pooling across studies
+
+## Pooling across studies
+
+Often, we want to take results from several cities and pool them together. One way to do this is using Two-level normal independent sampling estimation, which you can use with the `tlnise` function in the `tlnise` package by Roger Peng.
+
+This is a type of hierarchical Bayesian pooling. The theoretical paper for this is:
+
+Everson PJ, Morris CN (2000). “Inference for Multivariate Normal Hierarchical
+  Models,” Journal of the Royal Statistical Society, Series B, 62 (6) 399--412.
+
+## Pooling across studies
+
+First, this method uses some randomization, so in your code for a paper, you will want to start by setting a seed. This will ensure that every time you run your code, you will get the same results. 
+
+You can set a seed using `set.seed()` and then creating an object called `seed` to use in your tlnise options:
+
+```{r}
+set.seed(21)
+seed <- round(10000*runif(1))
+```
+
+## Pooling across studies
+
+Next, you will want to have a data frame with your log relative risk estimates for each location and the variance for each log relative risk. For example, say you have the following coefficients (log RRs) and their standard errors from your GLM for each city:
+
+```{r echo = FALSE}
+ex_cities <- data.frame(city = paste("city", c("a", "b", "c", "d")),
+           pm10 = rnorm(4, mean = 0.00025, sd = 0.00015),
+           se_pm10 = rnorm(4, mean = 0.00015, sd = 0.00005))
+```
+
+```{r}
+ex_cities
+```
+
+## Pooling across studies
+
+It is important that these are the coefficient estimates before you make any tranformations, because TLNise uses the assumption that the estimates are normally distributed. (In other words, don't transform to relative risk first!)
+
+Now, you can use the standard errors for each city to get the variance:
+
+```{r}
+ex_cities$var_pm10 <- ex_cities$se_pm10 ^ 2
+ex_cities
+```
+
+## Pooling across studies
+
+Now you can fit the TLNise model to these estimates and variances: 
+
+```{r}
+library(tlnise)
+pooled_effect <- tlnise(ex_cities$pm10, ex_cities$var_pm10,
+                        prior = 0, seed = seed,
+                        maxiter = 5000, prnt = FALSE)
+```
+
+## Pooling across studies
+
+A few notes about the options for `tlnise`: 
+
+- `prior = 0` sets what's called a non-informative prior for TLNise. This is a fairly typical choice for pooling environmental epidemiology estimates
+- `maxiter = 5000` tell how long R should keep trying to get the model to fit
+- `prnt` says whether to print out information as the code is running. 
+
+## Pooling across studies
+
+The result from the `tlnise` call is a list with several elements: 
+
+```{r}
+names(pooled_effect)
+```
+
+The overall pooled estimate is stored in `gamma`: 
+
+```{r}
+pooled_effect$gamma
+```
+
+## Pooling across studies
+
+To get, for example, a pooled estimate for the percent increase in mortality for a 10-unit increase in PM10, you would convert this estimate the same way you convert you single-city regression coefficients: 
+
+```{r}
+100 * (exp(pooled_effect$gamma[1] * 10) - 1)
+```
+
+In this example, the pooled estimate is a `r round(100 * (exp(pooled_effect$gamma[1] * 10) - 1), 3)`% increase in the health outcome for a 10-unit increase in PM10.
+
+## Pooling across studies
+
+There are some other interesting things you can pull out of the fitted object, as well. For example, `theta` has the posterior effect estimate for each city you included, and `SDtheta` has the standard deviation estimates for each of these posterior estimates. 
+
+For more information, you might want to read Francesca Dominici and Roger Peng's book, "Statistical Methods for Environmental Epidemiology with R".

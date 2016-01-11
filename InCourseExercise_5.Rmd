@@ -1,0 +1,206 @@
+---
+title: "In Course Exercise 5"
+author: "Brooke Anderson"
+date: "January 12, 2016"
+output: html_document
+---
+
+```{r echo = FALSE}
+knitr::opts_chunk$set(fig.path='figures/exercise5/plot-')
+```
+
+```{r, message=FALSE}
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(splines)
+```
+
+# Writing loops
+
+In the first part of this exercise, you will try to use loops to explore how estimates of the association between PM10 and cardiovascular mortality change when you use different degrees of freedom to control for long-term and seasonal trends. 
+
+- For this exercise, you will use the Chicago NMMAPS data from `dlnm`. Load that data and rename it `chic`. 
+- We will only need to use the columns `date`, `dow`, `cvd`, `temp`, and `pm10`, so use `dplyr` tools to select just those columns.
+- Fit an overdispersed Poisson GLM for the relationship between PM10 and cardiovascular mortality. Use a spline with 4 degrees of freedom to control for temperature and a spline with 7 degrees of freedom per year to control for long-term and seasonal trends. Also include control for day of week.
+- Fit the same model, but this time define the degrees of freedom for time as `df` before you fit the model, and use the `df` object in the GLM model call. You should get the same answer as before. 
+- Set up an empty dataframe to fill up with a loop. You'll want a column called `df_time` that has the values 1 through 14 and columns called `pm10` and `se` that are filled with `NA`s. Call this dataframe `df_sens`. 
+- Write a loop that goes through each row of this dataframe, fits the model with the specified number of degrees of freedom per year and then writes into the `df_sens` dataframe the `pm10` coefficient and its standard error from the fitted model.
+- Use ggplot to plot how the log relative risk estimate for PM10 changes with the degrees of freedom you use for long-term and seasonal trends.
+
+## Example R code
+
+For this exercise, you will use the Chicago NMMAPS data from `dlnm`. Load that data and rename it `chic`. 
+
+```{r}
+library(dlnm)
+data("chicagoNMMAPS")
+chic <- chicagoNMMAPS
+```
+
+We will only need to use the columns `date`, `dow`, `cvd`, `temp`, and `pm10`, so use `dplyr` tools to select just those columns.
+
+```{r}
+chic <- select(chic, date, dow, cvd, temp, pm10)
+head(chic, 3)
+```
+
+Fit an overdispersed Poisson GLM for the relationship between PM10 and cardiovascular mortality. Use a spline with 4 degrees of freedom to control for temperature and a spline with 7 degrees of freedom per year to control for long-term and seasonal trends. Also include control for day of week.
+
+```{r}
+chic$time <- scale(chic$date, center = TRUE, scale = FALSE)
+mod <- glm(cvd ~ pm10 + dow + ns(temp, 4) + ns(time, 7 * 14),
+           data = chic,
+           family = quasipoisson(),
+           control=glm.control(epsilon=10E-8, maxit = 10000))
+summary(mod)$coefficients["pm10", ]
+```
+
+Fit the same model, but this time define the degrees of freedom for time as `df` before you fit the model, and use the `df` object in the GLM model call.
+
+```{r}
+df <- 7
+mod <- glm(cvd ~ pm10 + dow + ns(temp, 4) + ns(time, df * 14),
+           data = chic,
+           family = quasipoisson(),
+           control=glm.control(epsilon=10E-8, maxit = 10000))
+summary(mod)$coefficients["pm10", ]
+```
+
+Set up an empty dataframe to fill up with a loop. You'll want a column called `df_time` that has the values 1 through 14 and columns called `pm10` and `se` that are filled with `NA`s. Call this dataframe `df_sens`.
+
+```{r}
+df_sens <- data.frame(df_time = 1:14, pm10 = NA, se = NA)
+df_sens
+```
+
+Write a loop that goes through each row of this dataframe, fits the model with the specified number of degrees of freedom per year and then writes into the `df_sens` dataframe the `pm10` coefficient and its standard error from the fitted model. (Note: It may take your loop a minute or two to run.)
+
+```{r}
+for(i in 1:nrow(df_sens)){
+        df <- df_sens$df_time[i]
+        mod <- glm(cvd ~ pm10 + dow + ns(temp, 4) + ns(time, df * 14),
+                   data = chic,
+                   family = quasipoisson(),
+                   control=glm.control(epsilon=10E-8, maxit = 10000))
+        df_sens[i, c("pm10", "se")] <- summary(mod)$coefficients["pm10", 1:2]
+}
+df_sens
+```
+
+Use ggplot to plot how the log relative risk estimate for PM10 changes with the degrees of freedom you use for long-term and seasonal trends.
+
+```{r fig.width = 5, fig.height = 3}
+ggplot(df_sens, aes(x= df_time, y = pm10)) + 
+        geom_line() + 
+        theme_bw() + 
+        xlab("d.f. for time") + 
+        ylab("log RR for PM10")
+```
+
+# Writing functions
+
+In the next part of this exercise, you will try to write some simple functions that are useful for environmental epidemiology. 
+
+- First, try writing a function called `C_to_F` that can convert a vector of temperatures from Celsius to Fahrenheit. Apply this to the `temp` column in `chic`. 
+- Next, write a function that takes a log relative risk for a 1-unit increase in exposure and converts it to percent increase in mortality for a user-specified unit increase. Call this function `conv_log_RR`. The function will have the arguments `log_RR` and `unit`. 
+- Use this function to determine the percent increase in mortality associated with a 10-unit increase in PM10 if you have a log RR of 0.0002 per 1-unit increase in PM10.
+- Write a function called `conf_int` that takes a coefficient estimate and its relative risk and calculates a vector of length 2 with the lower and upper 95% confidence bounds. 
+- Use this function to calculate the 95% CI of a log relative risk estimate of 0.0002 with a standard error estimate of 0.000015. 
+- Write a function that uses these two functions to take a log relative risk estimate and its standard error and calculate an effect estimate and 95% CI in terms of percent increase in mortality for a certain unit increase in PM10. Name this function `present_effect`. It should have the options `log_RR`, `unit`, and `log_RR_se`.
+- Use this function to determine the point estimate and 95% confidence of the percent increase in mortality associated with a 10-unit increase in PM10 if you have a log relative risk estimate of 0.0002 (se = 0.000015) per 1-unit increase in PM10. Determine same measure, but for a 20-unit increase in PM10.
+- Use this function to add columns to `df_sens` with the percent increase in mortality and 95% confidence intervals per 10-unit increase in PM10. Use a loop to do this.
+- Plot the relationship between degrees of freedom for year and the PM10 estimate using this converted estimate (percent increase in mortality per 10-units PM10). Show the 95% confidence intervals for each estimate. (Hint: Use `geom_segment()` for the 95% confidence intervals.)
+
+## Example R code
+
+First, try writing a function called `C_to_F` that can convert a vector of temperatures from Celsius to Fahrenheit. Apply this to the `temp` column in `chic`. 
+
+```{r}
+C_to_F <- function(T.celsius){
+        T.fahrenheit <- (9/5) * T.celsius + 32
+        return(T.fahrenheit)
+}
+
+C_to_F(35) ## Convert 35 C to Fahrenheit
+
+chic$temp_F <- C_to_F(chic$temp)
+head(chic$temp_F)
+```
+
+Next, write a function that takes a log relative risk for a 1-unit increase in exposure and converts it to percent increase in mortality for a user-specified unit increase. Call this function `conv_log_RR`. 
+
+```{r}
+conv_log_RR <- function(log_RR, unit){
+        RR <- exp(log_RR * unit)
+        perc_increase <- 100 * (RR - 1)
+        return(perc_increase)
+}
+```
+
+Use this function to determine the percent increase in mortality associated with a 10-unit increase in PM10 if you have a log RR of 0.0002 per 1-unit increase in PM10.
+
+```{r}
+conv_log_RR(log_RR = 0.0002, unit = 10)
+```
+
+Write a function called `conf_int` that takes a coefficient estimate and its relative risk and calculates a vector of length 2 with the lower and upper 95% confidence bounds. This function should have the arguments `est` and `se`. 
+
+```{r}
+conf_int <- function(est, se){
+        CIs <- est + c(-1, 1) * 1.96 * se
+        return(CIs)
+}
+```
+
+Use this function to calculate the 95% CI of a log relative risk estimate of 0.0002 with a standard error estimate of 0.000015. 
+
+```{r}
+conf_int(est = 0.0002, se = 0.000015)
+```
+
+Write a function that uses these two functions to take a log relative risk estimate and its standard error and calculate an effect estimate and 95% CI in terms of percent increase in mortality for a certain unit increase in PM10. Name this function `present_effect`. It should have the options `log_RR`, `unit`, and `log_RR_se`.
+
+```{r}
+present_effect <- function(log_RR, unit, log_RR_se){
+        log_RR_ci <- conf_int(est = log_RR, se = log_RR_se) 
+        out <- sapply(c(log_RR, log_RR_ci), conv_log_RR, unit = unit)
+        names(out) <- c("point_est", "lower_ci", "upper_ci")
+        return(out)
+}
+```
+
+Use this function to determine the point estimate and 95% confidence of the percent increase in mortality associated with a 10-unit increase in PM10 if you have a log relative risk estimate of 0.0002 (se = 0.000015) per 1-unit increase in PM10. Determine same measure, but for a 20-unit increase in PM10.
+
+```{r}
+present_effect(log_RR = 0.0002, unit = 10, log_RR_se = 0.000015)
+present_effect(log_RR = 0.0002, unit = 20, log_RR_se = 0.000015)
+```
+
+Use this function to add columns to `df_sens` with the percent increase in mortality and 95% confidence intervals per 10-unit increase in PM10. Use a loop to do this.
+
+```{r}
+df_sens[ , c("point_est", "lower_ci", "upper_ci")] <- NA
+df_sens
+
+for(i in 1:nrow(df_sens)){
+        df_sens[i, 4:6] <- present_effect(log_RR = df_sens$pm10[i],
+                                          unit = 10,
+                                          log_RR_se = df_sens$se[i])
+}
+df_sens
+```
+
+Plot the relationship between degrees of freedom for year and the PM10 estimate using this converted estimate (percent increase in mortality per 10-units PM10). Show the 95% confidence intervals for each estimate.
+
+```{r fig.width = 5, fig.height = 3}
+ggplot(df_sens, aes(x = df_time, y = point_est)) + 
+        geom_line() + 
+        geom_segment(aes(x = df_time, xend = df_time,
+                         y = lower_ci, yend = upper_ci)) + 
+        theme_bw() + 
+        xlab("d.f. / year for time") + 
+        ylab("% increase per 10-units\n increase PM10") + 
+        geom_hline(yintercept = 0, linetype = 2)
+```
+
