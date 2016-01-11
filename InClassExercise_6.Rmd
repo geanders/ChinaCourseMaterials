@@ -1,0 +1,53 @@
+---
+title: "In Course Exercise 6"
+author: "Brooke Anderson"
+date: "September 28, 2015"
+output: html_document
+---
+
+```{r echo = FALSE}
+library(knitr)
+knitr::opts_chunk$set(fig.path='figures/exercise6/plot-')
+```
+
+For all of this exercise's tasks, select one of the previous exercises we've done in the workshop that you found interesting. You'll use the code from that example to do these exercises. (You are also welcome to use R code from an outside project, if you'd like.)
+
+## Creating a Markdown document
+
+First , you'll create a Markdown document, without any R code in it yet.
+
+In RStudio, go to "File" -> "New File" -> "R Markdown". From the window that brings up, choose "Document" on the left-hand column and "HTML" as the output format. A new file will open in the script pane of your RStudio session.
+
+First, before you try to write your own Markdown, try compiling the example that the script includes by default. (This is the code that is included when you first open the file.) Try compiling the default example by clicking the "Knit HTML" button at the top of the script file. You may need to save the file before you can knit the file. If so, save it to a directory that's conveniently close, on your directory path, to where you have the data you plan to use for the rest of the exercise.
+
+For some of you, you may not yet have everything you need on your computer to be able to get this to work. If so, let me know. RStudio usually includes all the necessary tools when you install it, but there may be some exceptions.
+
+If you could get the document to knit, do the following tasks:
+
+- Look through the html document that was created. Compare it to the RMarkdown script that created it, and see if you can understand, at least broadly, what's going on.
+- Look in the directory where you saved the RMarkdown file. You should now also see a new, .html file in that folder. Try opening it with a web browser like Safari.
+- Delete everything after the initial header information (everything after the 6th line). In the header information, make sure the title, author, and date are things you're happy with. If not, change them.
+- At the top of the script file, click on the question mark button. Choose "Markdown Quick Reference". Your "Help" pane in RStudio should now show this reference, with some tips on the syntax for common things you'll want to do in Markdown documents.
+- Using Markdown syntax, write up a description of the data you're using today. Try to include the following elements:
+    + Bold and italic text
+    + HTML links
+    + A list, either ordered or bulleted
+    + Headers
+
+## Creating an RMarkdown document
+
+Now incorporate some R code into your document. Try the following:
+
+- Try some different options. For example, try setting `echo = FALSE` in some of your code chunks. Similarly, try using the options `results = "hide"` and `include = FALSE`. 
+- Include some chunks that generate figures. Try experimenting with the `fig.width` and `fig.height` options for the chunk to change the size of the figure. 
+- Try using the global commands. See if you can switch the `echo` default value for this document from TRUE (the usual default) to FALSE.
+
+## Working with RMarkdown documents
+
+Finally, try the following tasks to get some experience working with RMarkdown files in RStudio:
+
+- Go to one of your code chunks. Locate the small gray arrow just to the left of the line where you initiate the code chunk. Click on it and see what happens. Then click on it again.
+- Put your cursor inside one of your code chunks. Try using the "Run" button (or Ctrl-Return) to run code in that chunk at your R console. Did it work?
+- Go to the first code chunk in your document. Put your cursor somewhere in the code in that chunk. Click on the "Chunks" button and choose "Run All". What did that seem to do? If it did not work, what do you think might be going on? (Hint: Check `getwd()`.)
+- Pick another chunk of code. Put the cursor somewhere in the code for that chunk. Click on the "Chunks" button and choose "Run Current Chunk". Then try "Run Next Chunk". Try to figure out all the options the "Chunks" button gives you.
+- Click on the small gray arrow to the right of the "Knit HTML" button. If the option is offered, select "Knit Word" and try it. What does this do?
