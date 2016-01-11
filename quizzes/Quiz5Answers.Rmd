@@ -12,7 +12,7 @@ library(tidyr)
 library(ggplot2)
 library(ggthemes)
 library(gridExtra)
-knitr::opts_chunk$set(fig.path='quiz8/plot-')
+knitr::opts_chunk$set(fig.path='figures/quiz5/plot-')
 ```
 
 ##### Name: 

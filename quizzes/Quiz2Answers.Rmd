@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r echo = FALSE}
 library(knitr)
-knitr::opts_chunk$set(fig.path='quiz_figs/plot-')
+knitr::opts_chunk$set(fig.path='figures/quiz2/plot-')
 ```
 
 ##### Name: 
