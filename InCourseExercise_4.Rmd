@@ -87,7 +87,7 @@ ebola$country <- factor(bar[ , 2])
 
 ### Example R code
 
-Read the data in using `source_data()`. (Review question: Why can't you read it directly using `read.csv()`?)
+Read the data in using `read.csv()`.
 
 ```{r}
 ebola <- read.csv("data/country_timeseries.csv", header = TRUE)
