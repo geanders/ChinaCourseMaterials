@@ -1,0 +1,180 @@
+---
+title: "Quiz 4"
+author: ' '
+date: ' '
+output: pdf_document
+---
+
+```{r echo = FALSE, message = FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+knitr::opts_chunk$set(fig.path='figures/quiz4/plot-')
+```
+
+##### Name: 
+
+#### 1.--4. 
+
+You will be using the `worldcup` dataframe for some of the questions. As a reminder, here's what that looks like:
+
+```{r}
+library(faraway)
+data(worldcup)
+head(worldcup)
+```
+
+What would the head of the dataframe look like after each step of `dplyr` functions? Match the starts of the dataframes given in the numbered answers to the letter given in the comments following each line of the chained command:
+
+```{r, results = "hide"}
+my_df <- select(worldcup, Time, Passes, Tackles, Saves) %>%  # a.
+        summarize(Time = mean(Time), 
+                  Passes = mean(Passes), 
+                  Tackles = mean(Tackles),
+                  Saves = mean(Saves)) %>%  # b. 
+        gather(var, mean) %>%  # c.
+        mutate(mean = round(mean, 1))  # d. 
+```
+
+#### 1. 
+
+```{r, echo = FALSE}
+head(select(worldcup, Time, Passes, Tackles, Saves) %>%  # a.
+        summarize(Time = mean(Time), 
+                  Passes = mean(Passes), 
+                  Tackles = mean(Tackles),
+                  Saves = mean(Saves)) %>%  # b. 
+        gather(var, mean))
+```
+
+#### 2. 
+
+```{r echo = FALSE}
+head(select(worldcup, Time, Passes, Tackles, Saves))
+```
+
+#### 3. 
+
+```{r echo = FALSE}
+head(select(worldcup, Time, Passes, Tackles, Saves) %>%  # a.
+        summarize(Time = mean(Time), 
+                  Passes = mean(Passes), 
+                  Tackles = mean(Tackles),
+                  Saves = mean(Saves)) %>%  # b. 
+        gather(var, mean) %>%  # c.
+        mutate(mean = round(mean, 1)))
+```
+
+#### 4. 
+
+```{r, echo = FALSE}
+head(select(worldcup, Time, Passes, Tackles, Saves) %>%  # a.
+        summarize(Time = mean(Time), 
+                  Passes = mean(Passes), 
+                  Tackles = mean(Tackles),
+                  Saves = mean(Saves)))
+```
+
+> **Answers:**
+> 1. c., 
+> 2. a.,
+> 3. d.,
+> 4. b. 
+
+#### 5. 
+
+You run the following code:
+
+```{r, results = "hide"}
+i <- c(1, 3:4)
+j <- 2
+
+worldcup[j, i]
+```
+
+What will you get?
+
+a. `r worldcup[i, 1]`
+b. `r worldcup[i, j]`
+c. `r worldcup[j, i]`
+d. `r worldcup[j, j]`
+
+> **Answer: c**
+> Explanation: This is the same as running `worldcup[2, c(1, 3:4)]`. R will look for the definitions of `i` and `j` and put this into the indexing. Therefore, this is calling for the second row, first, third, and fourth columns. 
+
+#### 6. 
+
+You run the following code:
+
+```{r, results = "hide"}
+vars <- c("Time", "Shots", "Passes", "Tackles", "Saves")
+i <- 3
+
+var_mean <- mean(worldcup[ , vars[i]])
+var_mean
+```
+
+What will you get? (Hint: you may want to use some of the output shown in Questions 1--4 to help figure this out.)
+
+a. `r mean(worldcup$Shots)`
+b. `r mean(worldcup$Passes)`
+c. `r mean(worldcup$Time)`
+d. `r mean(worldcup$Saves)`
+
+> **Answer: b**
+> Explanation: Since `i` is defined as 3, `vars[i]` tells R to find the 3rd element of the `vars` vector, which is "Passes". `worldcup[ , vars[i]]` therefore pulls the "Passes" column of `worldcup`. The `mean` function takes the mean of that, which you can see from the output of questions 1--4 is `r mean(worldcup$Passes)`. 
+
+#### 7.--10.
+
+These questions plot data from another dataset in the `faraway` library, `hsb`. This includes data on the academic program choice of high school students. You can find out more using `?hsb`. 
+
+```{r}
+data(hsb)
+head(hsb, 3)
+```
+
+Match up the graphs given by each number below with the letter following lines of code in the `ggplot` call. You should match each letter with the graph you would get if you ran *up to and including* the line of code the letter appears on, minus the `+` at the end of the line.
+
+```{r, fig.keep='none'}
+ggplot(hsb, aes(x = math, y = science)) + 
+        geom_point(aes(shape = schtyp, color = schtyp)) + 
+        scale_color_grey() +  # a.
+        facet_wrap(~ prog, ncol = 1) +  # b. 
+        xlab("Math score") + ylab("Science score") +  # c.
+        theme_few()  # d.
+```
+
+```{r, echo = FALSE, fig.width = 10, fig.height = 8}
+a <- ggplot(hsb, aes(x = math, y = science)) + 
+        geom_point(aes(shape = schtyp, color = schtyp)) + 
+        scale_color_grey() + 
+        facet_wrap(~ prog, ncol = 1) + 
+        xlab("Math score") + ylab("Science score") + 
+        theme_few() + ggtitle("7.")
+
+b <- ggplot(hsb, aes(x = math, y = science)) + 
+        geom_point(aes(shape = schtyp, color = schtyp)) + 
+        scale_color_grey() + 
+        facet_wrap(~ prog, ncol = 1) + 
+        xlab("Math score") + ylab("Science score") + ggtitle("8.")
+
+c <- ggplot(hsb, aes(x = math, y = science)) + 
+        geom_point(aes(shape = schtyp, color = schtyp)) + 
+        scale_color_grey() + ggtitle("9.")
+
+d <- ggplot(hsb, aes(x = math, y = science)) + 
+        geom_point(aes(shape = schtyp, color = schtyp)) + 
+        scale_color_grey() + 
+        facet_wrap(~ prog, ncol = 1) + ggtitle("10.")
+
+grid.arrange(a, b, c, d, ncol = 2)
+```
+
+> **Answers**:
+> 7. d.,
+> 8. c.,
+> 9. a.,
+> 10. b. 

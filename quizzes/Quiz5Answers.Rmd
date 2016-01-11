@@ -1,0 +1,207 @@
+---
+title: "Quiz 5"
+author: ' '
+date: ' '
+output: pdf_document
+---
+
+```{r echo = FALSE, message = FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+knitr::opts_chunk$set(fig.path='quiz8/plot-')
+```
+
+##### Name: 
+
+#### `titanic` data
+
+For the questions today, you will be using data for passengers from the Titanic. Here is the start of this dataset, called `titanic`:
+
+```{r}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare)
+head(titanic)
+```
+
+#### 1.--6.
+Match the output to the numbers written in comments at the end of code lines. Each correct answer will show the output if you printed it out as of that line of code (i.e., you've run that line of the code with the exception of any `%>%` or `+` at the line end). Each number will have one and only one answer. Write your answer beside the question number in the code. For any answers that are dataframes, I'm only showing the `head` of the dataframe.
+
+```{r, results = "hide"}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 1.
+        select(-Name, -Sex, -Fare) %>%                          # 2.
+        mutate(Survived = factor(Survived,
+                                     levels = c(0, 1),
+                                     labels = c("No", "Yes")),
+               Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class")))      # 3.
+my_plot <- ggplot(toplot_1, aes(x = Survived, y = Age)) + 
+        geom_boxplot() +                                        # 4.
+        theme_tufte() +                                         # 5.
+        facet_grid(. ~ Pclass)                                  # 6.
+```
+
+a. 
+
+```{r echo = FALSE, fig.width = 6, fig.height = 2}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 3.
+        select(-Name, -Sex, -Fare) %>%                          # 4.
+        mutate(Survived = factor(Survived,
+                                     levels = c(0, 1),
+                                     labels = c("No", "Yes")),
+               Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) 
+my_plot <- ggplot(toplot_1, aes(x = Survived, y = Age)) + 
+        geom_boxplot() +                                        # 5.
+        theme_tufte() + facet_grid(. ~ Pclass)
+my_plot
+```
+
+b. 
+```{r echo = FALSE}
+head(titanic)
+```
+
+c. 
+```{r echo = FALSE}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 3.
+        select(-Name, -Sex, -Fare) %>%
+        mutate(Survived = factor(Survived,
+                                     levels = c(0, 1),
+                                     labels = c("No", "Yes")),
+               Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) 
+head(toplot_1)
+```
+
+d.
+
+```{r echo = FALSE, fig.width = 2, fig.height = 2}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 3.
+        select(-Name, -Sex, -Fare) %>%                          # 4.
+        mutate(Survived = factor(Survived,
+                                     levels = c(0, 1),
+                                     labels = c("No", "Yes")),
+               Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) 
+my_plot <- ggplot(toplot_1, aes(x = Survived, y = Age)) + 
+        geom_boxplot()
+my_plot
+```
+
+e. 
+
+```{r echo = FALSE}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 3.
+        select(-Name, -Sex, -Fare)
+head(toplot_1)
+```
+
+f. 
+```{r echo = FALSE}
+head(filter(titanic, !is.na(Age)))
+```
+
+g. 
+
+```{r echo = FALSE, fig.width = 2, fig.height = 2}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 3.
+        select(-Name, -Sex, -Fare) %>%                          # 4.
+        mutate(Survived = factor(Survived,
+                                     levels = c(0, 1),
+                                     labels = c("No", "Yes")),
+               Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) 
+my_plot <- ggplot(toplot_1, aes(x = Survived, y = Age)) + 
+        geom_boxplot() +                                        # 5.
+        theme_tufte() 
+my_plot
+```
+
+h. 
+
+```{r echo = FALSE, fig.width = 6, fig.height = 2}
+toplot_1 <- filter(titanic, !is.na(Age)) %>%                    # 3.
+        select(-Name, -Sex, -Fare) %>%                          # 4.
+        mutate(Survived = factor(Survived,
+                                     levels = c(0, 1),
+                                     labels = c("No", "Yes")),
+               Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) 
+my_plot <- ggplot(toplot_1, aes(x = Survived, y = Age)) + 
+        geom_boxplot() +                                        # 5.
+        facet_grid(. ~ Pclass)
+my_plot
+```
+
+> **Answers:**
+> 1. f.,
+> 2. e.,
+> 3. c.,
+> 4. d., 
+> 5. g., 
+> 6. a.
+
+#### 7.--8.
+
+You create the following function:
+
+```{r}
+clean_data <- function(df, age){
+        df_subset <- subset(df, Age == age) %>%
+                filter(!is.na(Age)) %>%
+                select(Survived, Sex, Age, Name) 
+        return(df_subset)
+}
+```
+
+What would you get if you ran the following code? (Only one answer each; please write the letter by the number in the code.)
+
+```{r results = "hide"}
+df_35 <- clean_data(df = titanic, age = 35)
+head(df_35, 3)                                  # 7.
+with(df_35, table(Sex, Survived))               # 8.
+```
+
+a. 
+```{r echo = FALSE}
+df_subset2 <- filter(titanic, !is.na(Age)) %>%
+                select(Survived, Sex, Age, Name)
+head(df_subset2, 3)
+```
+
+b. 
+```{r echo = FALSE}
+head(df_35, 3) 
+```
+
+c. 
+```{r echo = FALSE}
+with(df_35, table(Sex, Survived)) 
+```
+
+d.
+```{r echo = FALSE}
+df_subset2 <- subset(titanic, Age == 35) %>%
+                filter(!is.na(Age))
+head(df_subset2, 3)
+```
+
+e.
+```{r echo = FALSE}
+with(df_35, table(Sex)) 
+with(df_35, table(Survived)) 
+```
+
+> **Answers:**
+> 7. b.,
+> 8. c. 

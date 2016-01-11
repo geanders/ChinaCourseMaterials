@@ -1,0 +1,356 @@
+---
+title: "Quiz 6"
+author: ' '
+date: ' '
+output: pdf_document
+---
+
+```{r echo = FALSE, message = FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+knitr::opts_chunk$set(fig.path='quiz8/plot-')
+```
+
+##### Name: 
+
+#### `titanic` data
+
+For all of the questions today, you will be using data for passengers from the Titanic. Here is the start of this dataset, called `titanic`:
+
+```{r}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+head(titanic)
+```
+
+
+#### 1.-12. 
+Match the number at the end of each line to the letter of the output you would have if you ran all code up to that point. For all dataframes, only the first few lines are shown. Put the letter answer next to the number given in the code.
+
+```{r}
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) # 6.
+plot_4 <- ggplot(toplot_4, aes(x = agecat, y = perc_survived, fill = Pclass)) + 
+        geom_bar(stat = "identity", position = "dodge") +  # 7.
+        coord_flip() +                                     # 8.
+        ylab("Percent survivors") + xlab("Age category") + # 9.
+        theme_few() +                                      # 10.
+        scale_fill_discrete(name = "Ticket class") +       # 11.
+        facet_grid(. ~ Sex)                                # 12. 
+```
+
+a. 
+
+```{r echo = FALSE, fig.height = 2, fig.width = 6}
+plot_4
+```
+
+b. 
+
+```{r echo = FALSE}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15" 
+head(titanic)
+```
+
+c. 
+
+```{r echo = FALSE}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N)
+head(toplot_4)
+```
+
+d. 
+
+```{r echo = FALSE}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age))
+head(toplot_4)
+```
+
+e. 
+
+```{r echo = FALSE}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex)
+head(toplot_4)
+```
+
+f. 
+
+```{r echo = FALSE, fig.width = 4, fig.height = 2}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) # 6.
+plot_4 <- ggplot(toplot_4, aes(x = agecat, y = perc_survived, fill = Pclass)) + 
+        geom_bar(stat = "identity", position = "dodge") +  # 7.
+        coord_flip() +                                     # 8.
+        ylab("Percent survivors") + xlab("Age category") + # 9.
+        theme_few()
+plot_4
+```
+
+g. 
+
+```{r echo = FALSE}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"
+head(titanic)
+```
+
+h. 
+
+```{r echo = FALSE, fig.width = 5, fig.height = 2}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) # 6.
+plot_4 <- ggplot(toplot_4, aes(x = agecat, y = perc_survived, fill = Pclass)) + 
+        geom_bar(stat = "identity", position = "dodge")
+plot_4
+```
+
+i. 
+
+```{r echo = FALSE, fig.width = 4, fig.height = 2}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) # 6.
+plot_4 <- ggplot(toplot_4, aes(x = agecat, y = perc_survived, fill = Pclass)) + 
+        geom_bar(stat = "identity", position = "dodge") +  # 7.
+        coord_flip() +                                     # 8.
+        ylab("Percent survivors") + xlab("Age category") + # 9.
+        theme_few() +                                      # 10.
+        scale_fill_discrete(name = "Ticket class")
+plot_4
+```
+
+j. 
+
+```{r echo = FALSE, fig.width = 4, fig.height = 2}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) # 6.
+plot_4 <- ggplot(toplot_4, aes(x = agecat, y = perc_survived, fill = Pclass)) + 
+        geom_bar(stat = "identity", position = "dodge") +  # 7.
+        coord_flip() 
+plot_4
+```
+
+k. 
+
+```{r echo = FALSE}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class")))
+head(toplot_4)
+```
+
+l. 
+
+```{r echo = FALSE, fig.width = 4, fig.height = 2}
+titanic <- read.csv("../data/titanic.csv", as.is = TRUE) %>%
+        select(Survived, Pclass, Age, Name, Sex, Fare) %>% 
+        mutate(Pclass = as.factor(Pclass))
+titanic$agecat[titanic$Age < 15] <- "Under 15"          # 1. 
+titanic$agecat[titanic$Age >= 15 & 
+                     titanic$Age <= 50] <- "15--50"     # 2. 
+titanic$agecat[titanic$Age > 50] <- "Over 50"
+titanic$agecat <- factor(titanic$agecat,
+                         levels = c("Under 15",
+                                    "15--50",
+                                    "Over 50"))
+
+toplot_4 <- filter(titanic, !is.na(Age)) %>%            # 3. 
+        select(Survived, Pclass, agecat, Sex) %>%       # 4. 
+        group_by(Pclass, agecat, Sex) %>%
+        summarize(N = n(),
+                  survivors = sum(Survived == 1),
+                  perc_survived = 100 * survivors / N) %>% #5. 
+        ungroup() %>%
+        mutate(Pclass = factor(Pclass, levels = c(1, 2, 3),
+                               labels = c("First class", "Second class",
+                                          "Third class"))) # 6.
+plot_4 <- ggplot(toplot_4, aes(x = agecat, y = perc_survived, fill = Pclass)) + 
+        geom_bar(stat = "identity", position = "dodge") +  # 7.
+        coord_flip() +                                     # 8.
+        ylab("Percent survivors") + xlab("Age category")
+plot_4
+```
+
+> **Answers:**
+> 1. b.,
+> 2. g.,
+> 3. d.,
+> 4. e.,
+> 5. c.,
+> 6. k.,
+> 7. h.,
+> 8. j.,
+> 9. l.,
+> 10. f.,
+> 11. i.,
+> 12. a.
