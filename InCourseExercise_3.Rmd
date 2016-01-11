@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r echo = FALSE}
-knitr::opts_chunk$set(fig.path='figures/exercise4/plot-')
+knitr::opts_chunk$set(fig.path='figures/exercise3/plot-')
 ```
 
 ```{r, message=FALSE, echo = FALSE}
