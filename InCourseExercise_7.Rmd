@@ -1,0 +1,186 @@
+---
+title: "In Course Exercise 7"
+author: "Brooke Anderson"
+date: "September 28, 2015"
+output: html_document
+---
+
+```{r echo = FALSE}
+knitr::opts_chunk$set(fig.path='figures/exercise7/plot-')
+```
+
+```{r, message=FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+library(ggthemes)
+library(scales)
+```
+
+## Preliminaries
+
+- Download and read in the example data `recent-grads.csv`. Call the dataframe `grads`
+- Create a summarized dataframe from this data that includes one row for each category of major, the percent of women graduates from that major category (the sum of the number of women for each major in that category divided by the sum of the number of women and men for each major in the category), and the average of the median salary for majors in that category. Call this summarized dataframe `major_cats`.
+- Plot the relationship between the percent women in a major category (x-axis) versus the average of the median salary for the category. Label the major cateogries with (1) the highest median salary and (2) the highest percent of women. Try to print out the x-axis as a percent and the y-axis as dollars using the `scales` package and the functions `scale_x_continuous` and `scale_y_continuous` with the `label=` option.
+
+### Example R code
+
+Download and read in the example data in `recent-grads.csv`. Call the dataframe `grads`:
+
+```{r}
+grads <- read.csv("data/recent-grads.csv", sep = ",")
+head(grads)
+```
+
+Create a summarized dataframe from this data that includes one row for each category of major, the percent of women graduates from that major category (the sum of the number of women for each major in that category divided by the sum of the number of women and men for each major in the category), and the average of the median salary for majors in that category. Call this summarized dataframe `major_cats`.
+
+```{r}
+major_cats <- group_by(grads, Major_category) %>% 
+        summarize(perc_women = sum(Women) / (sum(Women) + sum(Men)),
+                  ave_median = mean(Median))
+
+interesting_points <- subset(major_cats, ave_median == max(ave_median) | 
+                                     perc_women == max(perc_women))
+```
+
+Plot the relationship between the percent women in a major category (x-axis) versus the average of the median salary for the category. Label the major cateogries with (1) the highest median salary and (2) the highest percent of women. Try to print out the x-axis as a percent and the y-axis as dollars using the `scales` package and the functions `scale_x_continuous` and `scale_y_continuous` with the `label=` option.
+
+```{r, fig.height = 3.5, fig.width = 6}
+ggplot(major_cats, aes(x = perc_women, y = ave_median)) + 
+        geom_point() + 
+        theme_few() + 
+        scale_x_continuous("Percent women", labels = percent,
+                           limits = c(0, 1)) + 
+        scale_y_continuous("Average of median salary",
+                           labels = dollar) + 
+        geom_text(data = interesting_points, aes(label = Major_category),
+                  hjust = -0.1, size = 4)
+```
+
+## Exploring data using loops 
+
+- From the summarized dataframe you created, `major_cats`, pull out the vector that lists all the categories. Name that vector `categories`. Use the `data.frame()` command to create a new dataframe, `incat_rels` (for "in-category relationships"), where the column `cat` gives each of these categories, and the columns `n`, `est` and `se` are (currently) filled with missing values (`NA`).
+- Loop through all these major categories. For the subset of majors within each category, fit a regression of median salary on percent of women in the major. Save the point estimate and standard error for each of these regressions in the `est` and `se` columns of the `incat_rels` dataframe. Save the number of majors in each category as the `n` column. Because you can't fit a regression with a slope and intecept if there is only one observation, remove the `Interdisciplinary` category from your `incat_rels` dataframe before you run the loop.
+- Perform the following changes on the `incat_rels` dataframe: (1) Add columns for the low and high values of the 95% confidence intervals; (2) Rearrange to go from the lowest to highest values of `est`.
+- Plot each of these within-major-category estimates and their 95% CIs. Re-assign the levels of the `cat` column so the plot will have a meaningful order. You'll want to use `geom_segment()` and `geom_point()` to make this plot. If you find that this crashes your R session when you do it, you may want to follow the example code precisely-- I've found R can have some problems with `geom_segments()` (but they're worth the effort).
+
+### Example R code
+
+From the summarized dataframe you created, `major_cats`, pull out the vector that lists all the categories. Name that vector `categories`. Use the `data.frame()` command to create a new dataframe, `incat_rels` (for "in-category relationships"), where the column `cat` gives each of these categories, and the columns `n`, `est` and `se` are (currently) filled with missing values (`NA`):
+
+```{r}
+categories <- major_cats$Major_category
+
+incat_rels <- data.frame(cat = categories, n = NA, est = NA, se = NA)
+incat_rels
+```
+
+Loop through all these major categories. For the subset of majors within each category, fit a regression of median salary on percent of women in the major. Save the point estimate and standard error for each of these regressions in the `est` and `se` columns of the `incat_rels` dataframe. Save the number of majors in each category as the `n` column. Because you can't fit a regression with a slope and intecept if there is only one observation, remove the `Interdisciplinary` category from your `incat_rels` dataframe before you run the loop.
+
+Try setting `i <- 1` first and doing all of this for the first major category:
+
+```{r}
+incat_rels <- subset(incat_rels, cat != "Interdisciplinary")
+
+i <- 1
+incat_rels$cat[i]
+
+major <- subset(grads, Major_category == incat_rels$cat[i])
+major
+
+incat_rels[i, "n"] <- nrow(major)
+head(incat_rels, 3)
+
+incat_mod <- lm(Median ~ ShareWomen, data = major)
+summary(incat_mod)$coefficients
+incat_rels[i, c("est", "se")] <- summary(incat_mod)$coefficients[2, 1:2]
+head(incat_rels, 3)
+```
+
+Now try expanding this to a loop:
+
+```{r}
+for(i in 1:nrow(incat_rels)){
+        major <- subset(grads, Major_category == incat_rels$cat[i])
+        incat_rels[i, "n"] <- nrow(major)
+        
+        if(incat_rels[i, "n"] > 1){
+                incat_mod <- lm(Median ~ ShareWomen, data = major)
+                incat_rels[i, c("est", "se")] <- 
+                        summary(incat_mod)$coefficients["ShareWomen", 1:2]
+        }
+}
+incat_rels
+```
+
+Perform the following changes on the `incat_rels` dataframe:
+
+- Add columns for the low and high values of the 95% confidence intervals
+- Rearrange to go from the lowest to highest values of `est`
+
+```{r}
+incat_rels <- mutate(incat_rels,
+                     low_ci = est - 1.96 * se,
+                     high_ci = est + 1.96 * se) %>%
+        arrange(est)
+incat_rels
+```
+
+Plot each of these within-major-category estimates and their 95% CIs. Re-assign the levels of the `cat` column so the plot will have a meaningful order. You'll want to use `geom_segment()` and `geom_point()` to make this plot. If you find that this crashes your R session when you do it, you may want to follow the example code precisely-- I've found R can have some problems with `geom_segments()` (but they're worth the effort).
+
+```{r, fig.width = 7, fig.height = 5}
+incat_rels$cat <- factor(incat_rels$cat, levels = incat_rels$cat)
+ggplot(incat_rels, aes(x = low_ci, y = cat)) + 
+        geom_vline(aes(xintercept = 0), color = "lightgray") +
+        geom_segment(aes(xend = high_ci, yend = cat)) + 
+        geom_point(aes(x = est, y = cat)) + 
+        ylab("") + 
+        scale_x_continuous("Effect estimate", label = dollar) + 
+        theme_tufte()
+```
+
+## Incorporating functions
+
+- Write a short function that can take a vector with three values-- point estimate, lower CI, and upper CI-- and output a single character vector with these pasted together in an attactive way (e.g., "-33,800 (-46,400, -21,200)").
+- Apply this function to the `incat_rels` columns for `est`, `low_ci`, and `high_ci`. Save the output to a new column in `incat_rels` called `Estimates`. 
+- Print out a table with the pretty estimates. Use the column names "Major category" and "Effect estimate". Use `kable()` from the `knitr` package to make the table print out in markdown. 
+
+### Example R code
+
+Write a short function that can take a vector with three values-- point estimate, lower CI, and upper CI-- and output a single character vector with these pasted together in an attactive way (e.g., "-33,800 (-46,400, -21,200)"):
+
+```{r}
+pretty_ests <- function(est_vec){
+        est_vec <- prettyNum(round(est_vec, -2), big.mark = ",")
+        out <- paste0(est_vec[1], " (", est_vec[2], ", ", est_vec[3], ")")
+        return(out)
+}
+pretty_ests(c(-33777.7, -46396.23, -21159.19))
+```
+
+Apply this function to the `incat_rels` columns for `est`, `low_ci`, and `high_ci`. 
+
+```{r}
+apply(incat_rels[ , c("est", "low_ci", "high_ci")], 1, pretty_ests)
+```
+
+Save the output to a new column in `incat_rels` called `Estimates`:
+
+```{r}
+incat_rels$Estimate <- apply(incat_rels[ , c("est", "low_ci", "high_ci")],
+                    1, pretty_ests)
+```
+
+Print out a table with the pretty estimates. Use the column names "Major category" and "Effect estimate". Use `kable()` from the `knitr` package to make the table print out in markdown. 
+
+```{r}
+out_tab <- mutate(incat_rels,
+                  Category = paste0(cat, " (N = ", n, ")")) %>%
+        select(Category, Estimate)
+colnames(out_tab) <- c("Major category", "Effect estimate")
+kable(out_tab, format = "markdown")
+```
+
+

@@ -1,0 +1,251 @@
+---
+title: "Course Notes 9"
+author: "Brooke Anderson, Assistant Professor of Epidemiology"
+date: "January 12, 2016"
+output: ioslides_presentation
+hitheme: tomorrow
+job: Colorado State University
+logo: figures/CSU_ram.png
+mode: selfcontained
+highlighter: highlight.js
+references:
+- author:
+  - family: Fenner
+    given: Martin
+  container-title: Nature Materials
+  id: fenner2012a
+  issue: 4
+  issued:
+    year: 2012
+  page: 261-263
+  publisher: Nature Publishing Group
+  title: One-click science marketing
+  type: article-journal
+  volume: 11
+framework: io2012
+---
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(fig.path='figures/notes9/plot-')
+
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggthemes)
+```
+
+# Some more about `knitr`
+
+## Equations in `knitr`
+
+You can write equations in RMarkdown documents by using `$`s. For an equation on a line by itself, you two `$`s before and after the equation, then use LaTex syntax for writing the equations.
+
+[LaTex math cheat sheet.](http://reu.dimacs.rutgers.edu/Symbols.pdf)
+
+Note: This will compile for pdfs and html documents, but won't always come through on Markdown files (for example, GitHub won't compile the math, so you'll see the compiled version on the pdf notes, but not the Markdown notes).
+
+## Equations in `knitr`
+
+<pre><code>
+$$
+E(Y_{t}) \sim \beta_{0} + \beta_{1}X_{1}
+$$
+</code></pre>
+
+$$
+E(Y_{t}) \sim \beta_{0} + \beta_{1}X_{1}
+$$
+
+## Equations in `knitr`
+
+To put math "in-line", just use one `$` on either side of the math:
+
+<pre><code>
+We are trying to model $E(Y_{t})$.
+</code></pre>
+
+We are trying to model $E(Y_{t})$.
+
+## Equations in `knitr`
+
+I would suggest that, until you learn the syntax for LaTex equations, that you use an online LaTex equation editor like: 
+
+[Codecogs.com](https://www.codecogs.com/latex/eqneditor.php)
+
+## Figures
+
+You can include a local figure with the following syntax. This example would include a figure called "MyFigure.png" in the sub-directory "figures" of the directory where your .Rmd is saved.
+
+<pre><code>
+![CSU Ram](figures/CSU_ram.png)
+</code></pre>
+
+You will need to give an absolute pathway or the relative pathway from the directory where the .Rmd file is saved.
+
+## Figures 
+
+Here is the figure from the code on the previous slide:
+
+![CSU Rams](figures/CSU_ram.png)
+
+In this generic syntax, you can't do much to change the figure size, etc. However, if you want to do all that, you can use html syntax to make changes in format.
+
+## Saving graphics files
+
+To save a figure for publications (in RMarkdown or just in an R script), take three steps: 
+
+1. Open a graphics device using a command like `pdf("MyFile.pdf")`.
+2. Write the code to print your plot. 
+3. Close the device using `dev.off()`.
+
+## Saving graphics files
+
+For example:
+
+```{r}
+library(ggplot2)
+library(faraway)
+data(worldcup)
+
+pdf("figures/MyFigure.pdf", width = 8, height = 6)
+ggplot(worldcup, aes(x = Time, y = Passes)) + 
+        geom_point(aes(color = Position)) + 
+        theme_bw()
+dev.off()
+```
+
+## Saving graphics files
+
+I now have a pdf file called "MyFigure.pdf" in the "figures" subdirectory of the directory where this .Rmd file is stored.
+
+If you are plotting multiple things before you close the device, they'll all save to different pages of the same pdf file. 
+
+## `kable` 
+
+You can use the `kable` function in the `knitr` package to add the syntax to a dataframe to render it as a formatted table (rather than looking like R output). To do this, you will need to specify the chunk option `results = "asis"`. This tells `knitr` not to format the output like R output, but instead let it pass directly as Markdown. 
+
+<pre><code>```{r results = "asis"}
+kable(my.df)
+```
+</code></pre>
+
+## `kable` 
+
+```{r}
+my.df <- data.frame(letters = c("a", "b", "c"),
+                numbers = 1:3)
+my.df
+```
+
+## `kable` 
+
+```{r eval = FALSE}
+my.df <- data.frame(letters = c("a", "b", "c"),
+                numbers = 1:3)
+kable(my.df)
+```
+<pre><code>
+letters | numbers
+--------|--------
+a       | 1
+b       | 2
+c       | 3
+</code></pre>
+
+## `kable` 
+
+```{r}
+my.df <- data.frame(letters = c("a", "b", "c"),
+                numbers = 1:3)
+kable(my.df)
+```
+
+## `kable` 
+
+There are a few options for the `kable` function:
+
+Option | What it does
+-------|--------------
+`digits` | A single value or a vector saying how many digits to include in the output
+`row.names` | TRUE / FALSE: Include row names?
+`col.names` | Column names to use
+`align` | A character vector saying how to align each column (`l` = left, `c` = center, `r` = right)
+`caption` | Caption for the table
+
+## `kable` 
+
+```{r}
+my.df <- data.frame(letters = c("a", "b", "c"),
+                numbers = rnorm(3))
+kable(my.df, digits = 2, align = c("c", "l"),
+      caption = "My new table", 
+      col.names = c("First 3 letters", 
+                    "First 3 numbers"))
+```
+
+## Citations
+
+Examples for the references are from [here](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html). 
+
+Check that out for more information and examples.
+
+## Citations
+
+To add references, you'll need to put the reference information in your header:
+
+<pre><code>
+references:
+- id: fenner2012a
+  title: One-click science marketing
+  author:
+  - family: Fenner
+    given: Martin
+  container-title: Nature Materials
+  volume: 11
+  issue: 4
+  publisher: Nature Publishing Group
+  page: 261-263
+  type: article-journal
+  issued:
+    year: 2012
+</code></pre>
+
+## Citations
+
+<pre><code>
+Here I'll reference the Fenner paper [@fenner2012a].
+</code></pre>
+<pre><code>Fenner agrees with us [-@fenner2012a].
+</code></pre>
+
+Here I'll reference the Fenner paper [@fenner2012a]. Fenner agrees with us [-@fenner2012a].
+
+## Citations
+
+Instead of putting all the reference information for each article in the header of the RMarkdown document, you can reference a separate file with all the citation info. 
+
+<pre><code>
+---
+title: "Sample Document"
+output: html_document
+bibliography: bibliography.bib
+---
+</code></pre>
+
+## Citations
+
+There are (free) reference managers for BibTex citation information, like [BibDesk](http://bibdesk.sourceforge.net), for Macs.
+
+You can change your Google Scholar defaults to include an "Import into BibTex" option.
+
+## purling
+
+You can take an .Rmd file and get knitr to pull out just its R code and save that as a separate R script. To do this, use the `purl` function from the `knitr` package:
+
+```{r eval = FALSE}
+library(knitr)
+purl("CourseNotes_9.Rmd")
+```
+
+## References

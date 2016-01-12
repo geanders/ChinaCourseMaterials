@@ -1,0 +1,354 @@
+---
+title: 'In Course Exercise 8'
+author: "Brooke Anderson"
+date: "January 12, 2016"
+output: html_document
+---
+
+```{r global_options, echo = FALSE}
+library(knitr)
+knitr::opts_chunk$set(fig.path='figures/exercise8/plot-',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r libraries}
+# Libraries to use
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+library(gridExtra)
+library(tidyr)
+```
+
+```{r get_data}
+# Read in and do preliminary clean-ups to the data
+
+drinks <- read.csv("data/drinks.csv", as.is = TRUE)
+
+continents <- read.csv("data/continents.csv", as.is = TRUE) %>%
+        select(Continent, Country) %>%
+        mutate(country = Country)
+
+gdp <- read.csv("data/GDP.csv", skip = 3, nrow = 195, as.is = TRUE) %>%
+        select(Economy, US.dollars.) %>%
+        dplyr::filter(!(Economy == "")) %>%
+        mutate(gdp = as.numeric(gsub(",", "", US.dollars.)),
+               country = Economy)
+
+wine <- read.csv("data/wine.csv", as.is = TRUE, nrow = 74) %>%
+        select(AreaName, Value) %>%
+        mutate(country = AreaName)
+```
+
+```{r match_country_names}
+# Check and see how well country names match up across datasets. Make changes 
+# so datasets can be merged
+
+# drinks$country[!(drinks$country %in% continents$country)]
+# continents$country[!(continents$country %in% drinks$country)]
+
+continents$country <- gsub(" and ", " & ", continents$country)
+continents$country <- gsub("Saint", "St.", continents$country)
+
+continents$country[continents$country == "Bosnia & Herzegovina"] <- "Bosnia-Herzegovina"
+continents$country[continents$country == "Burkina"] <- "Burkina Faso"
+continents$country[continents$country == "Ivory Coast"] <- "Cote d'Ivoire"
+continents$country[continents$country == "Cape Verde"] <- "Cabo Verde" 
+continents$country[continents$country == "Korea, North"] <- "North Korea"
+continents$country[continents$country == "Congo, Democratic Republic of"] <- "DR Congo"
+continents$country[continents$country == "Burma (Myanmar)"] <- "Myanmar"
+continents$country[continents$country == "Korea, South"] <- "South Korea"
+continents$country[continents$country == "East Timor"] <- "Timor-Leste"
+continents$country[continents$country == "United States"] <- "USA"
+
+# drinks$country[!(drinks$country %in% gdp$country)]
+# gdp$country[!(gdp$country %in% drinks$country)]
+
+gdp$country[gdp$country == "Congo, Rep."] <- "Congo"
+gdp$country[gdp$country == "Congo, Dem. Rep."] <- "DR Congo"
+
+gdp$country <- gsub(" and ", " & ", gdp$country)
+gdp$country <- gsub(",.*", "", gdp$country)
+
+gdp$country[gdp$country == "Bosnia & Herzegovina"] <- "Bosnia-Herzegovina"
+gdp$country[gdp$country == "Brunei Darussalam"] <- "Brunei"
+gdp$country[gdp$country == "C\xf4te d'Ivoire"] <- "Cote d'Ivoire"
+gdp$country[gdp$country == "Kyrgyz Republic"] <- "Kyrgyzstan"
+gdp$country[gdp$country == "Lao PDR"] <- "Laos"
+gdp$country[gdp$country == "Korea"] <- "South Korea"
+gdp$country[gdp$country == "S\xfc\xbe\x8c\xb6\x94\xbco Tom\xfc\xbe\x8e\x96\x94\xbc & Principe"] <- "Sao Tome & Principe"
+gdp$country[gdp$country == "Slovak Republic"] <- "Slovakia"
+gdp$country[gdp$country == "United States"] <- "USA"
+
+# drinks$country[!(drinks$country %in% wine$country)]
+# wine$country[!(wine$country %in% drinks$country)]
+
+wine$country[wine$country == "United States of America"] <- "USA"
+wine$country[wine$country == "Republic of Moldova"] <- "Moldova"
+wine$country[wine$country == "Viet Nam"] <- "Vietnam"
+wine$country[wine$country == "Bosnia and Herzegovina"] <- "Bosnia-Herzegovina"
+wine$country[wine$country == "Bolivia (Plurinational State of)"] <- "Bolivia"
+wine$country[wine$country == "The former Yugoslav Republic of Macedonia"] <- "Macedonia"
+```
+
+I've pulled in four datasets: 
+
+Dataset | Description
+--------| ------------
+`drinks` | Number of servings of different types of alcohol per country
+`continents` | Continents of most countries
+`gdp` | Gross domestic product of most countries
+`wine` | Wine production for some countries
+
+All the files used for these are in this week's `example_data` directory. More information about the data files are in that directory's README file.
+
+I have read these in from files and done some cleaning. Here are what each dataset looks like at this point:
+
+```{r echo = TRUE}
+head(drinks)
+head(continents)
+head(gdp)
+head(wine)
+```
+
+Next, I merged the datasets all together. I limited to only the countries where I had drink consumption, continent, and GDP. I kept countries if I had everything except wine production, although I merged this value in for countries for which I had it.
+
+```{r}
+# Merge datasets
+drinks <- inner_join(drinks, continents, by = "country") %>%
+        inner_join(gdp, by = "country") %>%
+        left_join(wine, by = "country") %>%
+        mutate(Continent = factor(Continent),
+               total_litres = total_litres_of_pure_alcohol,
+               wine_prod = Value) %>%
+        dplyr::select(-Country, -Economy, -US.dollars., -AreaName,
+                      -total_litres_of_pure_alcohol, -Value)
+```
+
+
+The combined dataset now looks like this:
+
+```{r echo = TRUE}
+head(drinks)
+```
+
+In total, the data now includes `r nrow(drinks)` countries spanning `r length(unique(drinks$Continent))` continents (`r paste(unique(drinks$Continent), collapse = ", ")`). 
+
+## Summary statistics on alcohol consumption
+
+Here are some summary statistics for the different alcohol consumptions metrics, both overall and by continent. Each column shows the mean for that metric, with interquartile ranges shown in parentheses.
+
+```{r}
+total_sum <- select(drinks, -gdp, -wine_prod) %>%
+        gather(Type, Value, -country, -Continent) %>%
+        dplyr::group_by(Type) %>%
+        dplyr::summarize(mean = mean(Value),
+                  iqr_25 = quantile(Value, probs = 0.25),
+                  iqr_75 = quantile(Value, probs = 0.75)) %>%
+        mutate(Mean = paste0(round(mean), " (", iqr_25, ", ", iqr_75, ")")) %>%
+        select(Type, Mean) 
+
+continent_sum <- select(drinks, -gdp, -wine_prod) %>%
+        gather(Type, Value, -country, -Continent) %>%
+        group_by(Continent, Type) %>%
+        dplyr::summarize(N = n(),
+                  mean = mean(Value),
+                  iqr_25 = quantile(Value, probs = 0.25),
+                  iqr_75 = quantile(Value, probs = 0.75))
+
+continent_order <- select(continent_sum, Continent, Type, mean) %>%
+        filter(Type == "total_litres") %>%
+        ungroup() %>%
+        arrange(desc(mean))
+
+continent_sum <- mutate(continent_sum,
+                        Mean = paste0(round(mean), " (", iqr_25,
+                                      ", ", iqr_75, ")")) %>%
+        dplyr::select(Continent, Type, Mean, N) %>%
+        spread(Type, Mean) 
+
+out_tab2 <- inner_join(continent_order, continent_sum, by = "Continent") %>%
+        select(Continent, N, contains("servings"), total_litres) 
+out_tab2 <- rbind(c(NA, nrow(drinks), total_sum$Mean),
+                  out_tab2)
+
+out_tab2$Continent <- as.character(out_tab2$Continent)
+out_tab2[1, 1] <- "All countries"
+out_tab2 <- out_tab2[, c("Continent", "N", "total_litres",
+                         "beer_servings", "spirit_servings", "wine_servings")]
+colnames(out_tab2)[3:6] <- c("Total (litres)", "Beer (servings)",
+                             "Spirits (servings)", "Wine (servings)")
+
+kable(out_tab2)
+```
+
+
+Here are measures for each country (total litres of pure alcohol, then servings of beer, spirits, and wine). Countries are grouped by continent and ordered by total litres of pure alcohol consumed.
+
+```{r fig.width = 8, fig.height = 20}
+toplot_2 <- select(drinks, -gdp, -wine_prod) %>%
+        mutate(Continent = factor(Continent, levels = c("Europe", 
+                                                        "Asia",
+                                                        "North America",
+                                                        "Oceania",
+                                                        "Africa",
+                                                        "South America"))) %>%
+        arrange(desc(Continent), total_litres) %>%
+        mutate(country = factor(country, levels = country)) %>%
+        gather(Type, Measure, -country, -Continent) %>%
+        mutate(Type = factor(Type, levels = c("total_litres", 
+                                              "beer_servings",
+                                              "spirit_servings",
+                                              "wine_servings"),
+                             labels = c("Total litres",
+                                        "Beer servings",
+                                        "Spirit servings",
+                                        "Wine servings"))) 
+
+ggplot(toplot_2, aes(x = Measure, y = country, color = Continent)) + 
+        geom_point() + 
+        geom_segment(aes(xend = 0, yend = country)) + 
+        facet_wrap(~ Type, ncol = 4, scale = "free_x") + 
+        theme_tufte() +
+        theme(legend.position="top") + 
+        xlab("") + ylab("")
+```
+
+
+## Countries with low alcohol consumption
+
+I classified a country as having low alcohol consumption if its serving values for wine, beer, and spirits were all below the 25<sup>th</sup> percentile for all countries. Low-alcohol-consumption countries were much more common in some continents than others:
+
+```{r}
+out_tab1 <- select(drinks, -gdp, -total_litres, -wine_prod) %>%
+        mutate(low_alcohol = beer_servings < quantile(beer_servings, 0.25) &
+                       spirit_servings < quantile(spirit_servings, 0.25) & 
+                       wine_servings < quantile(wine_servings, 0.25)) %>%
+        group_by(Continent) %>%
+        summarize(low_alcohol = 100 * sum(low_alcohol) / n()) %>%
+        arrange(desc(low_alcohol)) %>%
+        mutate("% low alcohol countries" = paste0(round(low_alcohol), "%")) %>%
+        select(-low_alcohol)
+
+continents <- unique(drinks$Continent)
+df <- data.frame(Continent = continents, countries = NA)
+
+for(i in 1:length(continents)){
+        low_alcohol <- subset(drinks, Continent == continents[i] &
+                       beer_servings < quantile(beer_servings, 0.25) &
+                       spirit_servings < quantile(spirit_servings, 0.25) & 
+                       wine_servings < quantile(wine_servings, 0.25))
+        low_alcohol <- paste(low_alcohol$country, collapse = ", ")
+        df$countries[i] <- low_alcohol
+}
+
+out_tab1 <- left_join(out_tab1, df, by = "Continent")
+colnames(out_tab1)[3] <- "Low-alcohol countries"
+
+kable(out_tab1, format = "markdown")
+```
+
+## Wine versus beer
+
+Here is a graph comparing wine consumption to beer consumption. Each point represents a country; color corresponds to the country's continent, and size corresponds with the total pure alcohol consumption in the country. Points to the right of the diagonal line are countries where more servings of wine are consumed than beer; to the left, more beer than wine.
+
+```{r fig.width = 6, fig.height  = 5}
+ggplot(drinks, aes(x = wine_servings, y = beer_servings)) + 
+        geom_point(alpha = 0.3, aes(color = Continent, size = total_litres)) + 
+        theme_few() + 
+        geom_abline(intercept = 0, slope = 1, color = "gray") +
+        theme(legend.position="bottom") + 
+        scale_size_continuous(name = "Total") + 
+        xlab("Wine (servings)") + ylab("Beer (servings)") 
+```
+
+Most countries with more wine consumption than beer consumption are in Europe (`r paste(drinks[drinks$Continent == "Europe" & drinks$wine_servings > drinks$beer_servings, "country"], collapse = ", ")`). A few are in South America (`r paste(drinks[drinks$Continent == "South America" & drinks$wine_servings > drinks$beer_servings, "country"], collapse = ", ")`), Africa (`r paste(drinks[drinks$Continent == "Africa" & drinks$wine_servings > drinks$beer_servings, "country"], collapse = ", ")`), and Asia (`r paste(drinks[drinks$Continent == "Asia" & drinks$wine_servings > drinks$beer_servings, "country"], collapse = ", ")`).
+
+I calculated a wine-to-beer serving ratio for each country. Below is a histogram of those ratios. 
+
+```{r fig.width = 7, fig.height = 3}
+toplot_3 <- select(drinks, -spirit_servings, -spirit_servings) %>%
+        mutate(wine_to_beer = wine_servings / beer_servings)
+interesting_points <- subset(toplot_3, wine_to_beer ==
+                                     max(toplot_3$wine_to_beer, na.rm = TRUE))
+
+ggplot(toplot_3, aes(x = wine_to_beer)) + 
+        geom_histogram(fill = "black", color = "white") + 
+        theme_few() + 
+        geom_vline(xintercept = 1, color = "gray") + 
+        xlab("Wine-to-beer ratio") + ylab("# of countries") + 
+        ylim(c(0, 115)) + 
+        annotate("text", x = 1.1, y = 110, label = "More wine", hjust = -0.1) + 
+        annotate("text", x = 0.9, y = 110, label = "More beer", hjust = 1.1) +
+        annotate("text", x = interesting_points$wine_to_beer,
+                 y = 7, label = interesting_points$country, hjust = 0.2, 
+                 size = 3)
+```
+
+Most countries have more beer than wine. The country with the highest wine-to-beer ratio is `r interesting_points$country`, with `r interesting_points$wine_servings` wine servings versus `r interesting_points$beer_servings` beer serving.
+
+Here is a table of the top five and bottom five wine-to-beer ratios:
+
+```{r}
+out_tab3 <- select(toplot_3, country, wine_servings, beer_servings,
+                   wine_to_beer) %>%
+        filter(!is.na(wine_to_beer)) %>%
+        arrange(desc(wine_to_beer), beer_servings) %>%
+        mutate(wine_to_beer = round(wine_to_beer, 1))
+
+out_tab3_top <- out_tab3[1:5, ]
+out_tab3_bottom <- out_tab3[(nrow(out_tab3) - 4):nrow(out_tab3), ]
+out_tab3 <- rbind(out_tab3_top,
+                  c("...", "...", "...", "..."),
+                  out_tab3_bottom)
+out_tab3 <- out_tab3[ , c(1, 4, 2, 3)]
+colnames(out_tab3) <- c("Country", "Wine-to-beer ratio",
+                        "Wine (servings)", "Beer (servings)")
+
+kable(out_tab3, format = "markdown")
+```
+
+
+Here are histograms of wine servings, divided by countries with above-median (blue) versus below-median (red) wine production within the country:
+
+```{r fig.width = 8, fig.height = 3}
+toplot_4 <- filter(drinks, !is.na(wine_prod)) %>%
+        mutate(high_prod = factor(wine_prod > median(wine_prod),
+                                  levels = c(TRUE, FALSE),
+                                  labels = c("High wine production",
+                                             "Low wine production")))
+
+ggplot(toplot_4, aes(x = wine_servings)) + 
+        geom_histogram(aes(fill = high_prod, color = high_prod),
+                       alpha = 0.3) + 
+        facet_wrap(~ high_prod, ncol = 1) + 
+        xlab("Wine (servings)") + 
+        theme_tufte() + 
+        theme(legend.position="none") + 
+        ylab("# of countries")
+```
+
+Countries with above-median wine production generally have higher wine consumption, although there are countries that go counter to the trend. For example, `r length(toplot_4$country[toplot_4$high_prod == "Low wine production" & toplot_4$wine_servings > 200])` countries-- `r paste(toplot_4$country[toplot_4$high_prod == "Low wine production" & toplot_4$wine_servings > 200], collapse = ", ")`-- are not high wine producers but have over 250 wine servings. Conversely, `r length(toplot_4$country[toplot_4$high_prod == "High wine production" & toplot_4$wine_servings < 15])` countries-- `r paste(toplot_4$country[toplot_4$high_prod == "High wine production" & toplot_4$wine_servings < 15], collapse = ", ")`-- are high wine producers but have less than 15 wine servings.
+
+## Alcohol consumption versus GDP
+
+Here are scatterplots of alcohol consumption (litres of pure alcohol) versus the GDP within each country (shown on a log10 scale):
+
+```{r fig.width = 8, fig.height = 4}
+toplot_4 <- mutate(drinks,
+                   Continent = factor(Continent,
+                                      levels = c("Europe", "North America",
+                                                 "Asia", "Oceania",
+                                                 "South America", "Africa")))
+ggplot(toplot_4, aes(x = gdp, y = total_litres, color = Continent)) + 
+        geom_point() + 
+        ylab("Pure alcohol consumption (litres)") + 
+        scale_x_log10("Gross domestic product", labels = dollar) + 
+        theme_few() + 
+        geom_smooth(method = "lm", se = TRUE) + 
+        facet_wrap(~ Continent, ncol = 3) + 
+        theme(legend.position="none")
+```
+
+Generally, alcohol consumption is higher in countries with higher GDPs-- North America is an exception. 
