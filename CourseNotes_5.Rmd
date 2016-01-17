@@ -235,7 +235,7 @@ ggplot(pos_est, aes(x = rr_low, y = position)) +
         ylab("") + 
         scale_x_continuous("Relative rate of passes\nper 90 minute increase in minutes played",
                            limits = c(1.0, max(pos_est$rr_high))) + 
-        geom_vline(aes(xintercept = 1), color = "lightgray")
+        geom_vline(aes(xintercept = 1), color = "lightgray") 
 ```
 
 ## Loops

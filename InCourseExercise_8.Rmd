@@ -268,7 +268,7 @@ Most countries with more wine consumption than beer consumption are in Europe (`
 I calculated a wine-to-beer serving ratio for each country. Below is a histogram of those ratios. 
 
 ```{r fig.width = 7, fig.height = 3}
-toplot_3 <- select(drinks, -spirit_servings, -spirit_servings) %>%
+toplot_3 <- select(drinks, -spirit_servings) %>%
         mutate(wine_to_beer = wine_servings / beer_servings)
 interesting_points <- subset(toplot_3, wine_to_beer ==
                                      max(toplot_3$wine_to_beer, na.rm = TRUE))
